@@ -478,4 +478,187 @@ index 38efebe..3bab325 100644
          @limit            = extract_limit(sql_type)
 ```
 
-^ At this point, all we know about our eventual API is that we're going to have a type object. Currently type casting lives on the column, so that seems like a reasonable place to put the type object. Eventually we'll want to delegate behavior to it, but to start, the first change is just injecting it, and passing `nil` in. This will allow us to familiarize ourselves with where the responsibility of building these objects lives, which will also point us towards where we're going to ultimately end up constructing the type objects.
+^ At this point, all we know about our eventual API is that we're going to have a type object. Currently type casting lives on the column, so that seems like a reasonable place to put the type object. Eventually we'll want to delegate behavior to it, but to start, the first change is just injecting it, and passing `nil` in. And then we run the tests. This will allow us to familiarize ourselves with where the responsibility of building these objects lives, which will also point us towards where we're going to ultimately end up constructing the type objects.
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb
+b/activerecord/lib/active_record/connection_adapters/column.rb
+index 3bab325..0087c20 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -13,11 +13,13 @@ module ActiveRecord
++      delegate :type, to: :cast_type
++
+       # Instantiates a new column in the table.
+       #
+       # +name+ is the column's name, such as <tt>supplier_id</tt> in
+<tt>supplier_id int(11)</tt>.
+@@ -35,7 +37,6 @@ module ActiveRecord
+         @limit            = extract_limit(sql_type)
+         @precision        = extract_precision(sql_type)
+         @scale            = extract_scale(sql_type)
+-        @type             = simplified_type(sql_type)
+         @default          = extract_default(default)
+         @default_function = nil
+         @primary          = nil
+@@ -263,40 +266,6 @@ module ActiveRecord
+-
+-        def simplified_type(field_type)
+-          case field_type
+-          when /int/i
+-            :integer
+-          when /float|double/i
+-            :float
+-          when /decimal|numeric|number/i
+-            extract_scale(field_type) == 0 ? :integer : :decimal
+-          when /datetime/i
+-            :datetime
+-          when /timestamp/i
+-            :timestamp
+-          when /time/i
+-            :time
+-          when /date/i
+-            :date
+-          when /clob/i, /text/i
+-            :text
+-          when /blob/i, /binary/i
+-            :binary
+-          when /char/i
+-            :string
+-          when /boolean/i
+-            :boolean
+-          end
+-        end
+     end
+   end
+```
+
+^ Now one by one, we go about replacing each of the giant case statements with delegation to the type objects. This commit also introduced an object responsible for doing the lookup based on SQL type.
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb
+b/activerecord/lib/active_record/connection_adapters/column.rb
+index 11b2e72..f46f9af 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -94,28 +94,10 @@ module ActiveRecord
+
+       # Casts value to an appropriate instance.
+       def type_cast(value)
+-        return nil if value.nil?
+-        return coder.load(value) if encoded?
+-
+-        klass = self.class
+-
+-        case type
+-        when :string, :text
+-          case value
+-          when TrueClass; "1"
+-          when FalseClass; "0"
+-          else
+-            value.to_s
+-          end
+-        when :integer              then klass.value_to_integer(value)
+-        when :float                then value.to_f
+-        when :decimal              then klass.value_to_decimal(value)
+-        when :datetime             then klass.string_to_time(value)
+-        when :time                 then klass.string_to_dummy_time(value)
+-        when :date                 then klass.value_to_date(value)
+-        when :binary               then klass.binary_to_string(value)
+-        when :boolean              then klass.value_to_boolean(value)
+-        else value
++        if encoded?
++          coder.load(value)
++        else
++          cast_type.type_cast(value)
+         end
+       end
+```
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb b/activerecord/lib/active_record/connection_adapters/column.rb
+index f46f9af..0f0aa91 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -18,7 +18,7 @@ module ActiveRecord
+
+       alias :encoded? :coder
+
+-      delegate :type, to: :cast_type
++      delegate :type, :text?, :number?, :binary?, to: :cast_type
+
+       # Instantiates a new column in the table.
+       #
+@@ -43,16 +43,6 @@ module ActiveRecord
+         @coder            = nil
+       end
+
+-      # Returns +true+ if the column is either of type string or text.
+-      def text?
+-        type == :string || type == :text
+-      end
+-
+-      # Returns +true+ if the column is either of type integer, float or decimal.
+-      def number?
+-        type == :integer || type == :float || type == :decimal
+-      end
+-
+       def has_default?
+         !default.nil?
+       end
+@@ -70,10 +60,6 @@ module ActiveRecord
+         end
+       end
+
+-      def binary?
+-        type == :binary
+-      end
+-
+       # Casts a Ruby value to something appropriate for writing to the database.
+       # Numeric columns will typecast boolean and string to appropriate numeric
+       # values.
+```
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb b/activerecord/lib/active_record/connection_adapters/column.rb
+index 107b18f..a23d2bd 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -18,7 +18,7 @@ module ActiveRecord
+
+       alias :encoded? :coder
+
+-      delegate :type, :text?, :number?, :binary?, :type_cast_for_write, to: :cast_type
++      delegate :type, :klass, :text?, :number?, :binary?, :type_cast_for_write, to: :cast_type
+
+       # Instantiates a new column in the table.
+       #
+@@ -47,19 +47,6 @@ module ActiveRecord
+         !default.nil?
+       end
+
+-      # Returns the Ruby class that corresponds to the abstract data type.
+-      def klass
+-        case type
+-        when :integer                     then Fixnum
+-        when :float                       then Float
+-        when :decimal                     then BigDecimal
+-        when :datetime, :time             then Time
+-        when :date                        then Date
+-        when :text, :string, :binary      then String
+-        when :boolean                     then Object
+-        end
+-      end
+-
+       # Casts value to an appropriate instance.
+       def type_cast(value)
+         if encoded?
+```
