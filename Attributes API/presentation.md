@@ -15,11 +15,75 @@
 
 ---
 
+# What goes into a great API
+
+1. Identify what is missing
+2. Have a rough idea of what you want the API to look like
+3. Test test test
+4. Create the objects which will make up your system
+5. Manually compose those together as needed
+6. Extract DSLs where there is duplication or pain
+
+---
+
 # Identifying Holes in Your API
 
 ^ Before you can design a great API, you need to find the API that you're missing. In any large or legacy code base (and make no mistake, Rails is just a large legacy code base), you can find plenty of concepts that exist in your domain, but don't have an explicit name. Common signs of this can include structurally similar or duplicated code, methods with the same prefix, or multiple classes/modules frequently overriding the same method.
 
-^ Here's some examples of code that you might find in Rails 4.1. The common concept will quickly become apparent.
+^ One of these concepts that became apparent inside of Active Record was changing the type of an attribute. If you wanted to do this inside of your code -- for example, to use a money object for price -- it might look something like this.
+
+---
+
+# Overriding an Attribute
+
+```ruby
+class Product < ActiveRecord::Base
+  def price
+    unless super.nil?
+      Money.new(super)
+    end
+  end
+
+  def price=(price)
+    if price.is_a?(Money)
+      super(price.amount)
+    else
+      super
+    end
+  end
+end
+```
+
+^ With code like this, it's reasonable to wonder: "am I going to break any Rails magic here?". The answer is: "it depends", but here's a list of things that might work unexpectedly.
+
+---
+
+# Things you might break
+
+- `_before_type_cast`
+- Dirty checking
+- Form builder integration
+
+^ In addition, there's other things that you might want to do that are significantly harder right now.
+
+---
+
+# Things you might want
+
+- Control over SQL representation
+- Ability to query with your values
+
+      ```ruby
+      Product.where(price: Money.new(50))
+      ```
+
+^ Rails overrides attribute types in plenty of places. You might be wondering how we do it in Rails. If you guessed "with a pile of hacks", you'd be right!
+
+---
+
+# Warning!
+# Rails Internals Ahead
+## Not for the faint of heart!
 
 ---
 
@@ -317,4 +381,101 @@ class Product < ActiveRecord::Base
 end
 ```
 
+^ Even at this early stage, there are several goals in what I'm looking for from this API. The first is that it's very apparent and straightforward what's happening on each line. By passing an object, instead of a symbol or a constant, things become much clearer. It's easy to look up documentation for the behavior of the string type, because you know exactly what class it is. You know what I can do with the type object you've given me, because you know what methods are available on it. You can create your own types, and they can take constructor arguments. No assumptions are made. This also makes it very easy to compose types with decorator objects, which we'll look at later on.
+
 ---
+
+> Always design a thing by considering it in its next larger context -- a chair in a room, a room in a house, a house in an environment, an environment in a city plan
+
+-- Eliel Saarinen
+
+^ At this point all we know is that we're going to be introducing a type object into the system, but presumably that will not be enough for a reasonable implementation. We'll start on this process by composing the objects in our system manually, but we'll be looking for places to extract collaborators, and make composing them easier as we go through. Before we start introducing the API, we need to say a few brief words about refactoring.
+
+---
+
+# Rule #1 of Refactoring
+## Have good test coverage
+
+---
+
+# Rule #2 of Refactoring
+## HAVE GOOD TEST COVERAGE
+
+---
+
+# Rule #3 of Refactoring
+## See rules 1 and 2
+
+---
+
+# Where we start
+
+```ruby
+# lib/active_record/connection_adapters/abstract/column.rb
+
+# Casts value (which is a String) to an appropriate instance.
+def type_cast(value)
+  return nil if value.nil?
+  return coder.load(value) if encoded?
+
+  klass = self.class
+
+  case type
+  when :string, :text        then value
+  when :integer              then klass.value_to_integer(value)
+  when :float                then value.to_f
+  when :decimal              then klass.value_to_decimal(value)
+  when :datetime, :timestamp then klass.string_to_time(value)
+  when :time                 then klass.string_to_dummy_time(value)
+  when :date                 then klass.value_to_date(value)
+  when :binary               then klass.binary_to_string(value)
+  when :boolean              then klass.value_to_boolean(value)
+  else value
+  end
+end
+```
+
+^ If you look for where type casting occurs in Rails 4.1, you'll find this. Like many things in Rails, it's a giant case statement. Awesome...
+
+---
+
+![inline](dirty-lies.png)
+
+---
+
+### `product.name = NotAString.new`
+
+### `product.created_at = Time.now`
+
+### `product.price *= 2`
+
+---
+
+# ಠ\_ಠ
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb b/activerecord/lib/active_record/connection_adapters/column.rb
+index 38efebe..3bab325 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -22,12 +22,14 @@ module ActiveRecord
+       #
+       # +name+ is the column's name, such as <tt>supplier_id</tt> in <tt>supplier_id int(11)</tt>.
+       # +default+ is the type-casted default value, such as +new+ in <tt>sales_stage varchar(20) default 'new'</tt>.
++      # +cast_type+ is the object used for type casting and type information.
+       # +sql_type+ is used to extract the column's length, if necessary. For example +60+ in
+       # <tt>company_name varchar(60)</tt>.
+       # It will be mapped to one of the standard Rails SQL types in the <tt>type</tt> attribute.
+       # +null+ determines if this column allows +NULL+ values.
+-      def initialize(name, default, sql_type = nil, null = true)
++      def initialize(name, default, cast_type, sql_type = nil, null = true)
+         @name             = name
++        @cast_type        = cast_type
+         @sql_type         = sql_type
+         @null             = null
+         @limit            = extract_limit(sql_type)
+```
+
+^ At this point, all we know about our eventual API is that we're going to have a type object. Currently type casting lives on the column, so that seems like a reasonable place to put the type object. Eventually we'll want to delegate behavior to it, but to start, the first change is just injecting it, and passing `nil` in. This will allow us to familiarize ourselves with where the responsibility of building these objects lives, which will also point us towards where we're going to ultimately end up constructing the type objects.
