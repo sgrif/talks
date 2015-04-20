@@ -21,8 +21,9 @@
 2. Have a rough idea of what you want the API to look like
 3. Test test test
 4. Create the objects which will make up your system
-5. Manually compose those together as needed
-6. Extract DSLs where there is duplication or pain
+5. Dogfood your system internally
+6. Manually compose those together as needed
+7. Extract DSLs where there is duplication or pain
 
 ---
 
@@ -114,22 +115,6 @@ end
 
 - Overriding an attribute reader/writer
 - Duplicates code from other parts of Active Record
-- Jumps through significant hoops for a relatively minor behavior change
-
----
-
-# Time Zone Conversion
-
-- Overriding an attribute reader/writer :white_check_mark:
-- Duplicates code from other parts of Active Record
-- Jumps through significant hoops for a relatively minor behavior change
-
----
-
-# Time Zone Conversion
-
-- Overriding an attribute reader/writer :white_check_mark:
-- Duplicates code from other parts of Active Record :white_check_mark:
 - Jumps through significant hoops for a relatively minor behavior change
 
 ---
@@ -376,12 +361,14 @@ user.age.class # => Fixnum
 
 ```ruby
 class Product < ActiveRecord::Base
-  attribute :name, Type::String.new
-  attribute :price, Type::Integer.new
+  attribute :name, String
+  attribute :price, Integer
 end
 ```
 
-^ Even at this early stage, there are several goals in what I'm looking for from this API. The first is that it's very apparent and straightforward what's happening on each line. By passing an object, instead of a symbol or a constant, things become much clearer. It's easy to look up documentation for the behavior of the string type, because you know exactly what class it is. You know what I can do with the type object you've given me, because you know what methods are available on it. You can create your own types, and they can take constructor arguments. No assumptions are made. This also makes it very easy to compose types with decorator objects, which we'll look at later on.
+^ At this point we can come up with a rough idea of what the API will look like. At this point we know two things for sure. We'll need to specify the name of the attribute, and we'll need to specify the type. We should try to avoid over-specifying what it'll look like at this point.
+
+^ Maybe rant about how the line between impl and usage is blurry at this point?
 
 ---
 
@@ -411,7 +398,7 @@ end
 # Where we start
 
 ```ruby
-# lib/active_record/connection_adapters/abstract/column.rb
+# lib/active_record/connection_adapters/column.rb
 
 # Casts value (which is a String) to an appropriate instance.
 def type_cast(value)
@@ -662,3 +649,354 @@ index 107b18f..a23d2bd 100644
        def type_cast(value)
          if encoded?
 ```
+
+---
+
+```ruby
+module ActiveRecord
+  module Type
+    class String < Value # :nodoc:
+      def type
+        :string
+      end
+
+      def type_cast(value)
+        if value
+          value.to_s
+        end
+      end
+
+      def serialize(value)
+        case value
+        when ::Numeric, ActiveSupport::Duration then value.to_s
+        when true then "t"
+        when false then "f"
+        else super
+        end
+      end
+    end
+  end
+end
+```
+
+^ So now we've refactored our existing type system into a structure that is easier to override. Now we need to look to introduce an API that allows us to override it. The simplest case we could start with would be changing the type of an attribute from string to integer. Let's write a test.
+
+---
+
+```ruby
+class OverloadedType < ActiveRecord::Base
+  create_table :overloaded_types do |t|
+    t.float :overloaded_float
+    t.float :unoverloaded_float
+  end
+
+  attribute :overloaded_float, Type::Integer.new
+end
+
+test "overloading types" do
+  data = OverloadedType.new
+
+  data.overloaded_float = "1.1"
+  data.unoverloaded_float = "1.1"
+
+  assert_equal 1, data.overloaded_float
+  assert_equal 1.1, data.unoverloaded_float
+end
+```
+
+^ This is what our first test might look like. What's important is that we've written the first invocation of our API. Let's talk about it more closely for a moment.
+
+---
+
+```ruby
+
+
+
+
+
+
+
+attribute :overloaded_float, Type::Integer.new
+```
+
+^ We start simple, composing our objects manually. Keeping it this way will give us the most flexibility as we continue to explore this API. This ends up becoming one of our first decisions about what our final API will look like. We pass in an object, instead of some other placeholder. It might be less pretty than a symbol or constant, but it's simple. And I'm not just talking about from an implementation point of view. Understanding this line is much easier when you can see what the objects are. If you need details of its behavior, you know where to look in the docs. We don't have to worry about semantics of allowing types that weren't created by Active Record. It's just Ruby, and Ruby just works.
+
+---
+
+# Every DSL has a cost
+
+^ Cognitive overhead
+
+^ Requires memorization
+
+^ Understanding Ruby is not enough. Puts additional burden on the reader to know that specific DSL, and any options you pass to it
+
+^ Thin line between helpful and too magic
+
+---
+
+# Implement in small steps
+
+^ At this point we can come up with a serviceable implementation by modifying the columns hash. This already feels quite wrong, since we're not changing the schema, we're changing the structure of the model. Unfortunately in 4.x these two things are tightly intertwined. But it'll do for now. However, if we try to just modify it directly, we'll run into another problem.
+
+---
+
+```ruby
+def columns
+  @columns ||= connection.schema_cache.columns(table_name).map do |col|
+    col = col.dup
+    col.primary = (col.name == primary_key)
+    col
+  end
+end
+
+def columns_hash
+  @columns_hash ||= Hash[columns.map { |c| [c.name, c] }]
+end
+```
+
+^ Attempting to access or modify the columns will hit the schema cache and execute a query. It's very important that you be able to load an Active Record class definition without a database connection, so we need to make our implementation lazy.
+
+---
+
+# Separate lazy from strict
+
+^ Ultimately the fact that we need to define the attributes lazily is a relatively minor detail, and it'd be great to make the strict version available as well to build upon. Here's roughly what the code looks like at this point.
+
+---
+
+```ruby
+def attribute(name, cast_type)
+  name = name.to_s
+
+  self.attributes_to_define_after_schema_loads =
+    attributes_to_define_after_schema_loads.merge(
+      name => cast_type
+    )
+end
+
+def define_attribute(name, cast_type)
+  clear_caches_calculated_from_columns
+
+  @columns = columns.map do |column|
+    if column.name == name
+      column.with_type(cast_type)
+    else
+      column
+    end
+  end
+end
+
+def load_schema! # :nodoc:
+  super
+  attributes_to_define_after_schema_loads.each do |name, type|
+    define_attribute(name, type)
+  end
+end
+```
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/enum.rb b/activerecord/lib/active_record/enum.rb
+index f053372..b70d52a 100644
+--- a/activerecord/lib/active_record/enum.rb
++++ b/activerecord/lib/active_record/enum.rb
+@@ -79,6 +79,37 @@ module ActiveRecord
+       super
+     end
+ 
++    class EnumType < Type::Value
++      # ...
++    end
++
+     def enum(definitions)
+       klass = self
+       definitions.each do |name, values|
+@@ -90,37 +121,19 @@ module ActiveRecord
+         detect_enum_conflict!(name, name.to_s.pluralize, true)
+         klass.singleton_class.send(:define_method, name.to_s.pluralize) { enum_values }
+ 
+-        _enum_methods_module.module_eval do
+-          # def status=(value) self[:status] = statuses[value] end
+-          klass.send(:detect_enum_conflict!, name, "#{name}=")
+-          define_method("#{name}=") { |value|
+-            # writer implementation...
+-          }
+-
+-          # def status() statuses.key self[:status] end
+-          klass.send(:detect_enum_conflict!, name, name)
+-          define_method(name) { enum_values.key self[name] }
++        detect_enum_conflict!(name, name)
++        detect_enum_conflict!(name, "#{name}=")
+ 
+-          # def status_before_type_cast() statuses.key self[:status] end
+-          klass.send(:detect_enum_conflict!, name, "#{name}_before_type_cast")
+-          define_method("#{name}_before_type_cast") { enum_values.key self[name] }
++        attribute name, EnumType.new(name, enum_values)
+@@ -138,25 +151,7 @@ module ActiveRecord
+     private
+       def _enum_methods_module
+         @_enum_methods_module ||= begin
+-          mod = Module.new do
+-            private
+-              def save_changed_attribute(attr_name, old)
+-                # significant source of bugs
+-              end
+-          end
++          mod = Module.new
+           include mod
+           mod
+         end
+```
+
+^ Unfortunately, most of our use cases need to modify the type of an attribute, without replacing it completely. What we need are decorators. However, just like replacing the type completely, this too needs to be lazy, since actually getting the type of an attribute will require hitting the database.
+
+---
+
+# Make your internal APIs as pleasant to use as your external APIs
+
+---
+
+```ruby
+def decorate_matching_attribute_types(matcher, decorator_name, &block)
+  self.attribute_type_decorations = attribute_type_decorations.merge(decorator_name => [matcher, block])
+end
+
+private
+
+def load_schema!
+  super
+  attribute_types.each do |name, type|
+    decorated_type = attribute_type_decorations.apply(name, type)
+    define_attribute(name, decorated_type)
+  end
+end
+```
+
+^ There's a good bit of code I'm leaving out for brevity. `attribute_type_decorations` is actually an object which will apply multiple decorations in the order they were defined. One thing that's important to note is that even though we don't need to take a decorator name, we would prefer to be able to have an idempotent API.
+
+---
+
+```ruby
+
+
+
+
+
+
+
+
+matcher = ->(name, type) { create_time_zone_conversion_attribute?(name, type) }
+decorate_matching_attribute_types(matcher, :_time_zone_conversion) do |type|
+  TimeZoneConverter.new(type)
+end
+```
+
+^ Again, we'll leave out a good bit of the code here, but we're able to replace a good bit of code with a relatively simple type. We no longer need to add additional hacks to decorate the column object, instead we have a single canonical way to hook into decorating the types. We can do the same thing for serialization.
+
+---
+
+```ruby
+
+
+
+
+
+
+
+
+matcher = ->(name, _) { name == attr_name }
+decorate_matching_attribute_types(matcher, :"_serialize_#{attr_name}") do |type|
+  Type::Serialized.new(type, coder)
+end
+```
+
+^ Again, idempotence is important here. Multiple calls to serialize on an attribute should override the previous calls, not serialize multiple times. Always matching an attribute with a given name seems like a generic enough pattern that we can codify it.
+
+---
+
+```ruby
+
+
+
+
+
+
+def decorate_attribute_type(attr_name, decorator_name, &block)
+  matcher = ->(name, _) { name == attr_name.to_s }
+  key = "_#{column_name}_#{decorator_name}"
+  decorate_matching_attribute_types(matcher, key, &block)
+end
+```
+
+---
+
+```ruby
+def serialize(attr_name, class_name_or_coder = Object)
+  coder = if [:load, :dump].all? { |x| class_name_or_coder.respond_to?(x) }
+            class_name_or_coder
+          else
+            Coders::YAMLColumn.new(class_name_or_coder)
+          end
+
+  decorate_attribute_type(attr_name, :serialize) do |type|
+    Type::Serialized.new(type, coder)
+  end
+end
+```
+
+^ The ability to make changes like this is paramount to a great API. A good API is easy to use, but a great API can be very easily built upon. Here we took a simple idea, being able to say "make this attribute be of this type". We turned that into the ability to decorate an existing type, built on that common patterns for decoration, and then were able to succinctly describe what serialize does in terms of this API.
+
+---
+
+```ruby
+module ActiveRecord
+  module Type
+    class Serialized < DelegateClass(Type::Value) # :nodoc:
+      attr_reader :subtype, :coder
+
+      def initialize(subtype, coder)
+        @subtype = subtype
+        @coder = coder
+        super(subtype)
+      end
+
+      def deserialize(value)
+        if default_value?(value)
+          value
+        else
+          coder.load(super)
+        end
+      end
+
+      def serialize(value)
+        return if value.nil?
+        unless default_value?(value)
+          super coder.dump(value)
+        end
+      end
+
+      private
+
+      def default_value?(value)
+        value == coder.load(nil)
+      end
+    end
+  end
+end
+```
+
+^ This is the type that described all of the casting behavior of serialize. I wanted to show the diff with the code that was removed, but I couldn't get it to be visible on a slide. We're talking about hundreds of lines.
+
+---
+
+# Make your API universal
+
+## There should be one canonical way to access things
+
+---
+
+# Blurrrrrrrrrghhhhhh
+
+## Slides...
