@@ -5,11 +5,20 @@
 - Sean Griffin
 - Software Developer at thoughtbot
 - Rails committer
+- Maintainer of Active Record (I'm sorry)
 - Bikeshed co-host
 
 ![inline](thoughtbot.png)
 
 ^ **Brief** intro about yourself
+
+---
+
+![fit](sinatra.jpg)
+
+---
+
+![fit](django.jpg)
 
 ^ Today we're going to talk about API design. I'd like to take a look at a new API that is being introduced in Rails 5 as an example. It's called the Attributes API, and it allows you to hook into the type casting system in Active Record. We're going to talk about the process that went into developing it.
 
@@ -18,10 +27,10 @@
 # What goes into a great API
 
 1. Identify what is missing
-2. Have a rough idea of what you want the API to look like
-3. Test test test
+2. **Roughly** decide what you want it to look like
+3. HAVE GOOD TESTS
 4. Create the objects which will make up your system
-5. Dogfood your system internally
+5. Use your objects internally
 6. Manually compose those together as needed
 7. Extract DSLs where there is duplication or pain
 
@@ -81,6 +90,8 @@ end
 ^ Rails overrides attribute types in plenty of places. You might be wondering how we do it in Rails. If you guessed "with a pile of hacks", you'd be right!
 
 ---
+
+![](dangerwillrobinson.gif)
 
 # Warning!
 # Rails Internals Ahead
@@ -306,6 +317,15 @@ define_method("#{name}_before_type_cast") { enum_values.key self[name] }
 
 # Enum
 
+- Overriding an attribute reader/writer
+- Duplicates code from other parts of Active Record
+- Jumps through significant hoops for a relatively minor behavior change
+- Introduces large number of subtle bugs
+
+---
+
+# Enum
+
 - Overriding an attribute reader/writer :white_check_mark:
 - Duplicates code from other parts of Active Record :white_check_mark: :white_check_mark: :white_check_mark:
 - Jumps through significant hoops for a relatively minor behavior change :white_check_mark:
@@ -439,6 +459,8 @@ end
 ---
 
 # ಠ\_ಠ
+
+^ You're not going to be able to read the code on the next several slides. That is OK.
 
 ---
 
@@ -719,7 +741,22 @@ end
 attribute :overloaded_float, Type::Integer.new
 ```
 
-^ We start simple, composing our objects manually. Keeping it this way will give us the most flexibility as we continue to explore this API. This ends up becoming one of our first decisions about what our final API will look like. We pass in an object, instead of some other placeholder. It might be less pretty than a symbol or constant, but it's simple. And I'm not just talking about from an implementation point of view. Understanding this line is much easier when you can see what the objects are. If you need details of its behavior, you know where to look in the docs. We don't have to worry about semantics of allowing types that weren't created by Active Record. It's just Ruby, and Ruby just works.
+^ We start simple, composing our objects manually. Keeping it this way will give us the most flexibility as we continue to explore this API. This ends up becoming one of our first decisions about what our final API will look like. 
+
+---
+
+```ruby
+
+
+
+
+
+
+
+attribute :overloaded_float, Type::Integer.new
+```
+
+^ We pass in an object, instead of some other placeholder. It might be less pretty than a symbol or constant, but it's simple. And I'm not just talking about from an implementation point of view. Understanding this line is much easier when you can see what the objects are. If you need details of its behavior, you know where to look in the docs. We don't have to worry about semantics of allowing types that weren't created by Active Record. It's just Ruby, and Ruby just works.
 
 ---
 
@@ -997,6 +1034,163 @@ end
 
 ---
 
-# Blurrrrrrrrrghhhhhh
+```ruby
+class Attribute # :nodoc:
+  attr_reader :name, :value_before_type_cast, :type
 
-## Slides...
+  def initialize(name, value_before_type_cast, type)
+    @name = name
+    @value_before_type_cast = value_before_type_cast
+    @type = type
+  end
+
+  def value
+    # `defined?` is cheaper than `||=` when we get back falsy values
+    @value = original_value unless defined?(@value)
+    @value
+  end
+
+  def original_value
+    type_cast(value_before_type_cast)
+  end
+
+  def value_for_database
+    type.serialize(value)
+  end
+
+  def type_cast(value)
+    type.cast(value)
+  end
+end
+```
+
+---
+
+```ruby
+class AttributeSet # :nodoc:
+  def initialize(attributes)
+    @attributes = attributes
+  end
+
+  def [](name)
+    attributes[name] || Attribute.null(name)
+  end
+
+  def []=(name, value)
+    attributes[name] = value
+  end
+
+  def values_before_type_cast
+    attributes.transform_values(&:value_before_type_cast)
+  end
+
+  def to_hash
+    initialized_attributes.transform_values(&:value)
+  end
+  alias_method :to_h, :to_hash
+
+  def key?(name)
+    attributes.key?(name) && self[name].initialized?
+  end
+
+  def keys
+    attributes.each_key.select { |name| self[name].initialized? }
+  end
+
+  def fetch_value(name, &block)
+    self[name].value(&block)
+  end
+
+  def write_from_database(name, value)
+    attributes[name] = self[name].with_value_from_database(value)
+  end
+
+  def write_from_user(name, value)
+    attributes[name] = self[name].with_value_from_user(value)
+  end
+
+  protected
+
+  attr_reader :attributes
+
+  private
+
+  def initialized_attributes
+    attributes.select { |_, attr| attr.initialized? }
+  end
+end
+```
+
+---
+
+```ruby
+def read_attribute(attr_name, &block)
+  @attributes.fetch_value(attr_name.to_s, &block)
+end
+
+def attributes
+  @attributes.to_hash
+end
+
+def _field_changed?(attr, old_value)
+  @attributes[attr].changed_from?(old_value)
+end
+```
+
+---
+
+# Prefer Composition over Inheritance
+
+Objects have an interface, which lets you infer what behavior can be affected.
+
+---
+
+Given that
+
+```ruby
+Product.belongs_to :user
+```
+
+when I call
+
+```ruby
+product.user.name = "Changed"
+product.save
+```
+
+Did the user's name change in the database?
+
+---
+
+# Have a contract
+
+```ruby
+assert_equals model.attribute, model.tap(&:save).reload.attribute
+
+model.attribute = model.attribute
+refute model.changed?
+
+refute Model.new.changed?
+
+assert_equal model, Model.find_by(attribute: model.attribute)
+```
+
+---
+
+# I don't know how to end this talk
+
+---
+
+# Conclusions
+
+---
+
+# Integrated Systems
+
+---
+
+# Synergy
+
+---
+
+# Please ask me questions now
