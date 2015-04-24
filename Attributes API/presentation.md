@@ -1035,6 +1035,22 @@ end
 ---
 
 ```ruby
+def load_schema!
+  @columns_hash = connection.schema_cache.columns_hash(table_name)
+  @columns_hash.each do |name, column|
+    define_attribute(
+      name,
+      connection.lookup_cast_type_from_column(column),
+      default: column.default,
+      user_provided_default: false
+    )
+  end
+end
+```
+
+---
+
+```ruby
 class Attribute # :nodoc:
   attr_reader :name, :value_before_type_cast, :type
 
@@ -1194,3 +1210,14 @@ assert_equal model, Model.find_by(attribute: model.attribute)
 ---
 
 # Please ask me questions now
+
+---
+
+# Sean Griffin
+
+- Twitter: [@sgrif](http://twitter.com/sgrif)
+- Github: [sgrif](http://github.com/sgrif)
+- Email: [sean@thoughtbot.com](mailto:sean@thoughtbot.com)
+- Podcast: [bikeshed.fm](http://bikeshed.fm)
+
+![inline](thoughtbot.png)

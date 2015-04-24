@@ -4,7 +4,7 @@
 
 > Monad **monad** monad functor monad applicative functor *monad* comonad
 > **contravariant comonad** functor monad monad
--- That functional guy who is probably way smarter than you
+-- That functional guy who thinks he is way smarter than you
 
 ---
 
