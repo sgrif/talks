@@ -3,12 +3,9 @@
 ---
 
 - Sean Griffin
-- Software Developer at thoughtbot
 - Rails committer
 - Maintainer of Active Record (I'm sorry)
 - Bikeshed co-host
-
-![inline](thoughtbot.png)
 
 ^ **Brief** intro about yourself
 
@@ -19,6 +16,10 @@
 ---
 
 ![fit](django.jpg)
+
+---
+
+# Rails
 
 ^ Today we're going to talk about API design. I'd like to take a look at a new API that is being introduced in Rails 5 as an example. It's called the Attributes API, and it allows you to hook into the type casting system in Active Record. We're going to talk about the process that went into developing it.
 
@@ -108,7 +109,9 @@ if create_time_zone_conversion_attribute?(attr_name, columns_hash[attr_name])
   method_body, line = <<-EOV, __LINE__ + 1
     def #{attr_name}=(time)
       time_with_zone = convert_value_to_time_zone("#{attr_name}", time)
-      previous_time = attribute_changed?("#{attr_name}") ? changed_attributes["#{attr_name}"] : read_attribute(:#{attr_name})
+      previous_time = attribute_changed?("#{attr_name}") ?
+        changed_attributes["#{attr_name}"] :
+        read_attribute(:#{attr_name})
       write_attribute(:#{attr_name}, time)
       #{attr_name}_will_change! if previous_time != time_with_zone
       @attributes_cache["#{attr_name}"] = time_with_zone
@@ -276,9 +279,21 @@ end
 - Duplicates code from other parts of Active Record :white_check_mark:
 - Jumps through significant hoops for a relatively minor behavior change :white_check_mark:
 - Overrides literally everything :white_check_mark:
+- Introduces large number of subtle bugs
+
+^ In this case we don't ever explicitly override the reader and writer, just the generic read/write attribute methods in Active Record. We see less direct copy/pasting of code, but this file ends up knowing about the entire structure of attribute assignment.
+
+---
+
+# Serialized Attributes
+
+- Overriding an attribute reader/writer :x:
+- Duplicates code from other parts of Active Record :white_check_mark:
+- Jumps through significant hoops for a relatively minor behavior change :white_check_mark:
+- Overrides literally everything :white_check_mark:
 - Introduces large number of subtle bugs :bomb: :bomb: :bomb: :bomb:
 
-^ In this case we don't ever explicitly override the reader and writer, just the generic read/write attribute methods in Active Record. We see less direct copy/pasting of code, but this file ends up knowing about the entire structure of attribute assignment. And oh my god this thing caused so many bugs.
+^ And oh my god this thing caused so many bugs.
 
 ^ A couple of things I didn't show is that this macro ends up modifying the columns hash, which is something that we'll talk about a lot later.
 
@@ -460,24 +475,24 @@ end
 
 # ಠ\_ಠ
 
-^ You're not going to be able to read the code on the next several slides. That is OK.
+---
+
+![inline](dhh.jpg)
+
+^ And this makes so much more sense now, because Kylie showed the truth behind
+it all. It was probably written while dressed like this:
+
+---
+
+![inline](dhh-racing.jpg)
 
 ---
 
 ```patch
-diff --git a/activerecord/lib/active_record/connection_adapters/column.rb b/activerecord/lib/active_record/connection_adapters/column.rb
 index 38efebe..3bab325 100644
 --- a/activerecord/lib/active_record/connection_adapters/column.rb
 +++ b/activerecord/lib/active_record/connection_adapters/column.rb
 @@ -22,12 +22,14 @@ module ActiveRecord
-       #
-       # +name+ is the column's name, such as <tt>supplier_id</tt> in <tt>supplier_id int(11)</tt>.
-       # +default+ is the type-casted default value, such as +new+ in <tt>sales_stage varchar(20) default 'new'</tt>.
-+      # +cast_type+ is the object used for type casting and type information.
-       # +sql_type+ is used to extract the column's length, if necessary. For example +60+ in
-       # <tt>company_name varchar(60)</tt>.
-       # It will be mapped to one of the standard Rails SQL types in the <tt>type</tt> attribute.
-       # +null+ determines if this column allows +NULL+ values.
 -      def initialize(name, default, sql_type = nil, null = true)
 +      def initialize(name, default, cast_type, sql_type = nil, null = true)
          @name             = name
@@ -492,26 +507,6 @@ index 38efebe..3bab325 100644
 ---
 
 ```patch
-diff --git a/activerecord/lib/active_record/connection_adapters/column.rb
-b/activerecord/lib/active_record/connection_adapters/column.rb
-index 3bab325..0087c20 100644
---- a/activerecord/lib/active_record/connection_adapters/column.rb
-+++ b/activerecord/lib/active_record/connection_adapters/column.rb
-@@ -13,11 +13,13 @@ module ActiveRecord
-+      delegate :type, to: :cast_type
-+
-       # Instantiates a new column in the table.
-       #
-       # +name+ is the column's name, such as <tt>supplier_id</tt> in
-<tt>supplier_id int(11)</tt>.
-@@ -35,7 +37,6 @@ module ActiveRecord
-         @limit            = extract_limit(sql_type)
-         @precision        = extract_precision(sql_type)
-         @scale            = extract_scale(sql_type)
--        @type             = simplified_type(sql_type)
-         @default          = extract_default(default)
-         @default_function = nil
-         @primary          = nil
 @@ -263,40 +266,6 @@ module ActiveRecord
 -
 -        def simplified_type(field_type)
@@ -544,7 +539,38 @@ index 3bab325..0087c20 100644
    end
 ```
 
-^ Now one by one, we go about replacing each of the giant case statements with delegation to the type objects. This commit also introduced an object responsible for doing the lookup based on SQL type.
+^ Now one by one, we go about replacing each of the giant case statements with
+delegation to the type objects. This commit also introduced an object
+responsible for doing the lookup based on SQL type.
+
+---
+
+```patch
+@@ -35,7 +37,6 @@ module ActiveRecord
+         @limit            = extract_limit(sql_type)
+         @precision        = extract_precision(sql_type)
+         @scale            = extract_scale(sql_type)
+-        @type             = simplified_type(sql_type)
+         @default          = extract_default(default)
+         @default_function = nil
+         @primary          = nil
+```
+
+---
+
+```patch
+diff --git a/activerecord/lib/active_record/connection_adapters/column.rb
+b/activerecord/lib/active_record/connection_adapters/column.rb
+index 3bab325..0087c20 100644
+--- a/activerecord/lib/active_record/connection_adapters/column.rb
++++ b/activerecord/lib/active_record/connection_adapters/column.rb
+@@ -13,11 +13,13 @@ module ActiveRecord
++      delegate :type, to: :cast_type
++
+       # Instantiates a new column in the table.
+       #
+       # +name+ is the column's name, such as <tt>supplier_id</tt> in
+```
 
 ---
 
@@ -580,6 +606,14 @@ index 11b2e72..f46f9af 100644
 -        when :binary               then klass.binary_to_string(value)
 -        when :boolean              then klass.value_to_boolean(value)
 -        else value
+         end
+       end
+```
+
+---
+
+```patch
+       def type_cast(value)
 +        if encoded?
 +          coder.load(value)
 +        else
@@ -604,6 +638,11 @@ index f46f9af..0f0aa91 100644
 
        # Instantiates a new column in the table.
        #
+```
+
+---
+
+```patch
 @@ -43,16 +43,6 @@ module ActiveRecord
          @coder            = nil
        end
@@ -621,6 +660,11 @@ index f46f9af..0f0aa91 100644
        def has_default?
          !default.nil?
        end
+```
+
+---
+
+```patch
 @@ -70,10 +60,6 @@ module ActiveRecord
          end
        end
@@ -650,6 +694,11 @@ index 107b18f..a23d2bd 100644
 
        # Instantiates a new column in the table.
        #
+```
+
+---
+
+```patch
 @@ -47,19 +47,6 @@ module ActiveRecord
          !default.nil?
        end
@@ -811,7 +860,11 @@ def attribute(name, cast_type)
       name => cast_type
     )
 end
+```
 
+---
+
+```ruby
 def define_attribute(name, cast_type)
   clear_caches_calculated_from_columns
 
@@ -823,7 +876,11 @@ def define_attribute(name, cast_type)
     end
   end
 end
+```
 
+---
+
+```ruby
 def load_schema! # :nodoc:
   super
   attributes_to_define_after_schema_loads.each do |name, type|
@@ -850,6 +907,11 @@ index f053372..b70d52a 100644
      def enum(definitions)
        klass = self
        definitions.each do |name, values|
+```
+
+---
+
+```patch
 @@ -90,37 +121,19 @@ module ActiveRecord
          detect_enum_conflict!(name, name.to_s.pluralize, true)
          klass.singleton_class.send(:define_method, name.to_s.pluralize) { enum_values }
@@ -864,27 +926,23 @@ index f053372..b70d52a 100644
 -          # def status() statuses.key self[:status] end
 -          klass.send(:detect_enum_conflict!, name, name)
 -          define_method(name) { enum_values.key self[name] }
-+        detect_enum_conflict!(name, name)
-+        detect_enum_conflict!(name, "#{name}=")
  
 -          # def status_before_type_cast() statuses.key self[:status] end
 -          klass.send(:detect_enum_conflict!, name, "#{name}_before_type_cast")
 -          define_method("#{name}_before_type_cast") { enum_values.key self[name] }
+```
+
+---
+
+```patch
+@@ -90,37 +121,19 @@ module ActiveRecord
+         detect_enum_conflict!(name, name.to_s.pluralize, true)
+         klass.singleton_class.send(:define_method, name.to_s.pluralize) { enum_values }
+ 
++        detect_enum_conflict!(name, name)
++        detect_enum_conflict!(name, "#{name}=")
+ 
 +        attribute name, EnumType.new(name, enum_values)
-@@ -138,25 +151,7 @@ module ActiveRecord
-     private
-       def _enum_methods_module
-         @_enum_methods_module ||= begin
--          mod = Module.new do
--            private
--              def save_changed_attribute(attr_name, old)
--                # significant source of bugs
--              end
--          end
-+          mod = Module.new
-           include mod
-           mod
-         end
 ```
 
 ^ Unfortunately, most of our use cases need to modify the type of an attribute, without replacing it completely. What we need are decorators. However, just like replacing the type completely, this too needs to be lazy, since actually getting the type of an attribute will require hitting the database.
@@ -897,7 +955,8 @@ index f053372..b70d52a 100644
 
 ```ruby
 def decorate_matching_attribute_types(matcher, decorator_name, &block)
-  self.attribute_type_decorations = attribute_type_decorations.merge(decorator_name => [matcher, block])
+  self.attribute_type_decorations =
+    attribute_type_decorations.merge(decorator_name => [matcher, block])
 end
 
 private
@@ -1153,11 +1212,66 @@ def _field_changed?(attr, old_value)
 end
 ```
 
+^ Actually that first method doesn't quite look like that (I wish it did)
+
+---
+
+# A quick aside
+
+## (because Koichi is here)
+
+```ruby
+def _read_attribute(attr_name) # :nodoc:
+  @attributes.fetch_value(attr_name.to_s) { |n| yield n if block_given? }
+end
+```
+
+^ Talk about the &block problem (keep it quick, nobody cares Sean)
+
+^ And actually it doesn't look like this either, because we were able to fix
+this on JRuby, and the end result is that `&block` is actually faster than this
+form, and this is one of our biggest hotspots in Rails
+
+---
+
+# A quick aside
+
+## (because Koichi is here)
+
+```ruby
+if defined?(JRUBY_VERSION)
+  def _read_attribute(attr_name, &block) # :nodoc
+    @attributes.fetch_value(attr_name.to_s, &block)
+  end
+else
+  def _read_attribute(attr_name) # :nodoc:
+    @attributes.fetch_value(attr_name.to_s) { |n| yield n if block_given? }
+  end
+end
+```
+
+See: https://youtu.be/QNeqna_ToPM?t=828
+
 ---
 
 # Prefer Composition over Inheritance
 
+## Both in implementation and in interface
+
 Objects have an interface, which lets you infer what behavior can be affected.
+
+---
+
+# Keep implementations simple
+
+If your implementation is complex or hard to understand, there's a good chance using your API will be complex and hard to understand.
+
+^ Note: This doesn't necessarily apply in all cases, like the one that Sam
+demonstrated yesterday. A good litmus test is if you can easily describe the
+contract with your users in normal speech easily.
+
+^ Also keep in mind that just because an API looks simple, doesn't mean it is
+simple.
 
 ---
 
@@ -1181,13 +1295,38 @@ Did the user's name change in the database?
 # Have a contract
 
 ```ruby
-assert_equals model.attribute, model.tap(&:save).reload.attribute
+attribute = model.attribute
 
+model.save
+model.reload
+
+attribute_after_save = model.attribute
+
+assert_equals attribute, attribute_after_save
+```
+
+---
+
+# Have a contract
+
+```ruby
 model.attribute = model.attribute
 refute model.changed?
+```
 
+---
+
+# Have a contract
+
+```ruby
 refute Model.new.changed?
+```
 
+---
+
+# Have a contract
+
+```ruby
 assert_equal model, Model.find_by(attribute: model.attribute)
 ```
 
@@ -1201,11 +1340,11 @@ assert_equal model, Model.find_by(attribute: model.attribute)
 
 ---
 
-# Integrated Systems
+# That is the Attributes API
 
 ---
 
-# Synergy
+# I hope you like it
 
 ---
 
@@ -1217,7 +1356,5 @@ assert_equal model, Model.find_by(attribute: model.attribute)
 
 - Twitter: [@sgrif](http://twitter.com/sgrif)
 - Github: [sgrif](http://github.com/sgrif)
-- Email: [sean@thoughtbot.com](mailto:sean@thoughtbot.com)
+- Email: [sean@seantheprogrammer.com](mailto:sean@seantheprogrammer.com)
 - Podcast: [bikeshed.fm](http://bikeshed.fm)
-
-![inline](thoughtbot.png)
