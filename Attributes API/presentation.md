@@ -473,18 +473,11 @@ end
 
 ---
 
+![inline](code-comments.jpg)
+
+---
+
 # ಠ\_ಠ
-
----
-
-![inline](dhh.jpg)
-
-^ And this makes so much more sense now, because Kylie showed the truth behind
-it all. It was probably written while dressed like this:
-
----
-
-![inline](dhh-racing.jpg)
 
 ---
 
@@ -1214,11 +1207,13 @@ end
 
 ^ Actually that first method doesn't quite look like that (I wish it did)
 
+^ And finally, all of the method that were previously on `ActiveRecord::Base`
+which can't be removed because they're public API turn into one liners which
+delegate to the attribute set in a simple way.
+
 ---
 
 # A quick aside
-
-## (because Koichi is here)
 
 ```ruby
 def _read_attribute(attr_name) # :nodoc:
@@ -1235,8 +1230,6 @@ form, and this is one of our biggest hotspots in Rails
 ---
 
 # A quick aside
-
-## (because Koichi is here)
 
 ```ruby
 if defined?(JRUBY_VERSION)
