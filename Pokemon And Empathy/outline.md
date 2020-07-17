@@ -37,6 +37,37 @@ How does any of this actually work
   happen to have the desirable effect of item duplication
 - Probably start by discussing the constraints of GB dev, 8k of RAM, reasons
   to avoid storing things on the cartridge unless absolutely necessary
+- What order should these be presented in?
+  - One obvious answer is in the order we do the glitches, not sure how well
+    this flows though
+    - Main benefit here is that the talk has a natural start by showing a video
+      of the glitch
+  - Maybe start from the goal and work backwards?
+    - If we do this do we start by demonstrating the glitch? Do we show a video
+      of each piece?
+    - Probably still want to leave why the item count change happens for the
+      end, it's relatively mundane by itself and feels like a good payoff at the
+      end
+    - Present the glitch as a goal: "If we can fight a MissingNo. we will get
+      128 rare candies"
+    - This is probably where we discuss what MissingNo. is, that there are
+      multiple versions, maybe mention 'M here?
+    - So our goal is to encounter a MissingNo, let's look at how Pokemon Blue
+      determined encounters
+    - Present Route 20, maybe mention safari zone glitch, reframe the goal as if
+      we could somehow load an encounter table with missingno into the grass
+      table, we can use route 20 to fight it
+    - Somewhere in there we need to mention that the grass table isn't
+      overwritten when the zone doesn't have one
+    - Now we can talk about the old man glitch, start talking about how names
+      worked
+    - Maybe at this point we fast forward back to encountering it and we can
+      start discussing all the different variants
+      - Mention glitched trainer battles at this point too? Definitely not
+        spending a lot of time on that
+    - Finally we show why the item count changes
+    - Maybe mention hall of fame data corruption here too
+    - Definitely mention why its sprite gets that weird shape
 
 Old man glitch
 --
@@ -83,12 +114,22 @@ is that your name goes in the encounter table
   - Preset names can't encounter 'M, because they're all stored as one giant
     block, separated only by byte 80 which is "end of name". e.g.
     RED[80]ASH[80]JACK[80]NEW NAME[80]
-  - FIXME: Didn't see any explicit zeroing of the table when entering cities.
-    How does the zero for 'M end up there if your name is the max length?
-    Should check the code for the old man encounter, and/or character creation
-- Trainers were only for punctuation characters, so most folks never saw them.
-  - FIXME: What actually happens for values that result in a trainer? Is it
-    actually a battle or can you catch your rival?
+  - Custom names could always encounter 'M due to 0s at the end of their names.
+    Names in general were 11 bytes, but the player could only input 7. Bytes
+    9-11 would always be 0.
+- You could also get glitched trainer battles, but those only happened for
+  punctuation characters, so most folks never saw them.
+
+Other ways to load missingno into the encounter table
+--
+
+- Trades and link battles store the other player's name in the same spot as the
+  grass encounter table.
+  - Notably, all NPCs that trade pokemon are named TRAINER, so their name is
+    `<TRAINER>@@@@@@@@@@` (0x5D followed by 0x80 10 times), which gives an
+    encounter table consisting entirely of level 80 missingnos. There is an NPC
+    trade in the Cinnabar lab, which is likely how this glitch was originally
+    discovered
 
 Getting the glitched encounter
 --
@@ -127,140 +168,89 @@ Getting the glitched encounter
     those tiles with a flower in the bottom right corner can't have wild
     encounters). When it checks what encounter table to use, it looks at the
     bottom left.
-  - In Ruby the code looks roughly something like this:
-  - ```ruby
-    tile = tile_at(9, 9)
-    encounter_rate = nil
-    if tile.is_grass?
-      encounter_rate = @grassEncounterRate
-    elsif tile.is_water?
-      encounter_rate = @waterEncounterRate
-    end
+  - In Rust the code looks roughly something like this:
+  - ```rust
+    let tile = tile_at(9, 9);
+    let encounter_rate = if tile.is_grass() {
+      Some(current_area.grass_encounter_rate)
+    } else if tile.is_water() {
+      Some(current_area.watter_encounter_rate)
+    } else {
+      None
+    };
 
-    if encounter_rate
-      tile = tile_at(8, 9)
-      if tile.is_water?
-        perform_encounter(@waterPokemon)
-      else
-        peform_encounter(@grassPokemon)
-      end
-    end
+    if let Some(encounter_rate) = encounter_rate {
+      let tile = tile_at(8, 9)
+      if tile.is_water() {
+        perform_encounter(current_area.water_pokemon)
+      } else {
+        peform_encounter(current_area.grass_pokemon)
+      }
+    }
     ```
     - We lose something subtle by translating this to a high level language like
-      Ruby. This bug could only occur because we're reassigning to `tile`, which
+      Rust. This bug could only occur because we're reassigning to `tile`, which
       you would never do normally. When you look at the actual assembly the
       constraints are a bit more clear.
       - We probably need to handwave over this and just go "because assembly".
         The actual reason is because GBZ80 has 7 general purpose registers, and
-        they're basically all used all the time. The `cp` instruction clobbers 4
-        of them, including the `c` register which is where the subtile gets
-        stored
-      - FIXME:
-        ```
-        coord hl, 9, 9
-        ld c, [hl]
-        ld a, [wGrassTile]
-        cp c
-        ld a, [wGrassRate]
-        jr z, .CanEncounter
-        ld a, $14 ; in all tilesets with a water tile, this is its id
-        cp c
-        ld a, [wWaterRate]
-        jr z, .CanEncounter
-        ```
-        c should be clobbered by the first cp, second cp should never set z. But
-        you can encounter pokemon while surfing so something is up
+        they're basically all used all the time. The address of the tile was
+        stored in hl, and its value was loaded into c. These end up getting
+        re-used to hold the pokemon being encountered, and the second coord is
+        loaded into a. It looks like if a and c were swapped in
+        TryDoWildEncounter#next, the reload wouldn't have been needed. However
+        this may have been a constraint of which instructions work with which
+        registers, it may have been a desire to not have register allocation be
+        reasoned about over too much code, it may have been intentional, or just
+        a mistake.
+        - I think it's due to instruction limitations. `ld a, [addr]` is GB
+          specific, and AFAICT only allows the `a` register for arbitrary
+          addresses, but you can specifically load `[hl]` into any register
+    - THIS SLIDE IS GOING TO BE HARDEST TO MAKE ACCESSIBLE
+    - DO NOT ASSUME THE AUDIENCE KNOWS WHAT A REGISTER IS, DON'T TRY TO DO THIS
+      BY EXPLAINING HOW OPCODES WORK
+    - In the assembly, the loads are 45 lines apart
 
+What even is a MissingNo
+--
 
-Learning Empathy From Pokemon Blue
-====
+MissingNo vs 'M
+--
 
-Have you ever looked at a bug in a video game and wondered why it actually
-happens? It's easy to chalk it up to sloppy coding but that's almost never the
-case.
+Results of the encounter
+--
 
-In this talk we'll be dissecting a famous exploit from 1999's Pokemon Blue known
-as the "Missingno" glitch. We'll look at the details of each of the bugs behind
-the seemingly random actions involved in this exploit. We'll look at why these
-bugs happened, and the lessons we can apply to our Ruby code more than 20 years
-later.
+- There were two visible effects of the encounter with either MissingNo or 'M
+  - Your hall of fame data (if present) would be corrupted
+  - The 6th item in your inventory would have its quantity increased by 128
+  - If you caught it, Exeggutor would be marked as seen.
+- Things that people believed were true that were not true
+  - Your game would not be saved as a result of the encounter
+  - Catching the pokemon was completely safe and would not corrupt your save
+    - There is a very specific issue if you tried to withdraw a level 0 'm from
+      the PC that would freeze your game. This would not happen with MissingNo,
+      or with 'M of any other level. Since all players with a custom name could
+      encounter a level 0 'M, and since you almost certainly had a party of 6
+      pokemon at this point which meant 'M would be sent to the PC if you caught
+      it, I suspect this is why people got the idea it was unsafe to catch.
+- Despite MissingNo's sprite very clearly being garbage data, MissingNo actually
+  does have appropriate entries, and is not the 
+- Looking up the base stats and sprites for missingno end up underflowing into
+  trainer party data. Missingno's stats end up coming from 
 
-If you've never played or even heard of Pokemon, that's ok! As long as you're
-interested in a deep dive into a fascinating set of bugs, this talk is for you.
+Random hardware/asm notes
+---
 
-Details
-===
+- The stack was 286 bytes
+- a, f, and hl couldn't really be used as general purpose registers
+  - Most operations stored their output in a, f was read only except for
+    loading af from the stack, you could only load addresses stored in hl
+    to registers other than a
+- Explain to the audience as "you get four global mutable variables that are 1
+  byte each, write the largest handheld video game ever made"
 
-The subject of this talk is developer empathy, not Pokemon. The goal of this
-talk is to remove "this is completely broken" from our vocabularies. We'll also
-be looking at the importance of encapsulation, and keeping knowledge local and
-contained. This talk will take the audience through the series of seemingly
-unrelated bugs that together lead to a major exploit. The audience is not
-expected to have played Pokemon before attending this talk. As we go through
-these bugs, we'll be looking at *why* they may have happened. We'll be focusing
-on the constraints the game was developed under, and focus on how these lead to
-bugs, not "sloppy coding", laziness, or incompetence.
+Random pokemon notes
+---
 
-The glitch that we'll be analyzing is coloquially referred to as the "Missingno"
-glitch, as the desired result is an encounter with a glitched out pokemon with
-that name. This glitch was well known among kids when this game came out, since
-after encountering Missingno, the 6th item in your inventory would have its
-quantity increased by 128.
-
-We'll start the talk by demonstrating how the exploit is performed with either a
-video or still images. For the members of the audience who have never played
-Pokemon, the purpose of this section will be to establish what the game is, and
-the effects of the glitch that we're looking at. For the entire audience, the
-goal is to establish just how random the actions the player takes are. To give
-you an idea of just how random they are, it includes replaying an early game
-tutorial and then immediately going up and down the coast of a late game area.
-We will ensure this is accessible to folks who have never played the game.
-
-We'll then start to go through each bug in detail. Games in 1999, especially
-handheld games, were written in assembly. The hardware constraints were strict
-enough that even the overhead of C was too much. There's been an immense effort
-in taking the disassembly of Pokemon, labeling things and re-organizing them to
-resemble what a developer would have written. This doesn't mean that we're going
-to be showing a lot of assembly, but it does mean we have an actual reference of
-the source to use to understand these bugs. Any time assembly is shown, we will
-be showing equivalent Ruby. Often that leads to extremely un-ideomatic Ruby, and
-we'll use those idiosyncrasies to note the hardware limitations of the time.
-
-As we go through the individual bugs, we'll be focusing on a few repeating themes
-
-- These bugs are completely unrelated to each other. There's no way anybody
-  would have foreseen these parts of the code interacting with each other.
-- More often than not, these bugs were due to side effects of one part of the
-  application being unexpectedly observed by another. Working in an object
-  oriented language, we have many more tools at our disposal to protect
-  ourselves against this.
-- There was often some constraint in play that forced clever solutions to
-  problems
-- It's unlikely that these would have been caught in code review individually
-  (and we'll discuss exactly why).
-
-If there is time, we'll cover a few questions that folks who did play the game
-when it came out are likely to have:
-
-- What did they do in Pokemon Yellow (an enhanced version that came out a year
-  later) to fix this?
-- Why did some folks seem to have no problem getting the encounter, but it could
-  take hours for others? (This wasn't just folks misunderstanding statistics)
-- Why did Missingno sometimes look like a fossil?
-- Why were we told not to catch it? What would happen if we did?
-- Why was Missingno sometimes called 'M?
-
-The intended audience takeaways are:
-
-- OMG THIS GLITCH WAS SO INTERESTING TO LEARN ABOUT
-- Software is never "completely broken". All software has bugs, and they rarely
-  come from sloppy coding or laziness. It's more likely you don't know the
-  constraints it was developed under.
-- While bugs will always happen, focusing on encapsulation and limiting visible
-  side effects can keep multiple bugs from interacting with each other to become
-  something worse.
-- Games of this era are super accessible, and worth digging into the details of
-  how these things worked.
-
-This talk was co-authored by two people. Only one of us will be getting on
-stage, but we've both put an imense amount of time and energy into this talk.
+- The anime and games have used the same voice actress for Pikachu since 1997,
+  and she has appeared in more episodes of the anime than anybody else
