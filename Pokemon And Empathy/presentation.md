@@ -2,12 +2,15 @@
 
 ---
 
-# Who am I?
+# Siân Griffin
 
-- Siân Griffin
-- SiÃ¢n Griffin for the ISO-8859-1 crowd
-- Crates.io Team Lead
-- Creator of Diesel
+---
+
+# SiÃ¢n Griffin
+
+---
+
+# they/them
 
 ---
 
@@ -15,1995 +18,692 @@
 
 ---
 
-# [Intro information here]
+![inline](green_box.jpg)
+
+^ The first Pokemon game was made by a small team for Japanese audiences. The game was made on a very small budget, and the programming team was only 4 people. In 1996 Pokemon Red and Green were released and sales vastly exeeded expectations.
+
+---
+
+![inline](blue_box_jp.png)
+
+^ Later that year an updated version was released in Japan with improved graphics and more polish. After it was clear this game was far more popular than anybody expected, there was a mad rush to localize it for international audiences.
+
+---
+
+![inline](blue_box.jpg)
+
+^ 2 years later in 1998, Pokemon Red and Blue were released to the rest of the world, and would go on to be the highest grossing media franchise of all time, eclipsing even Mickey Mouse and Hello Kitty.
+
+---
+
+![inline](pikachu.png)
+
+^ Even if you've never played Pokemon I'll wager you've seen this one before. This is an actual picture of Ryan Reynolds in 1998. Ok not really, this is Pikachu, by far the most famous Pokemon, but there was a close second.
 
 ---
 
 ![inline](MissingNo.png)
 
----
-
-# What is a MissingNo?
+^ This is MissingNo. You could only encounter this Pokemon through a glitch, but
 
 ---
 
-# [Video of glitch]
+# Almost everyone knew about this glitch
+
+^ One of the things that I find most fascinating about this glitch is how wide spread it was. In a survey I ran, 87% of people who owned the game knew about the glitch when it was relevant, and 80% of those people heard about it through word of mouth -- not the internet. And there was a good reason
 
 ---
 
----
-[.build-lists: true]
+# MissingNo could duplicate items
 
-# C
-
-- Pros
-  - Tight control over data layout
-
-- Cons
-  - "type" system
-
-^ On the other side you have C, which gives you very tight control over how things are laid out, but you have to give up so much to get this.
+^ This glitch had a lot of names. The MissingNo glitch, or the item dupe glitch. At my school it was called the Rare Candy glitch, since most people used it to duplicate an item with that name. It made your pokemon more powerful when you used it, so it was a really desirable item to duplicate. Let's take a look at how you performed the glitch.
 
 ---
 
-![inline](why-not-both.jpg)
+![fit autoplay](oldman.mov)
 
-^ Rust loves to blow up traditional trade-offs like this. Concurrency without data races, memory safety without garbage collection, and so on. This is a big part of Rust's secret sauce. What make's it special. You could even call it...
-
----
-
-# Rust's Fireflower
+^ FIXME: If there's time, re-record with audio
 
 ---
 
-# Rust's Fireflower
-
-![fit](trollface.png)
+![fit autoplay](fly.mov)
 
 ---
 
-# Rust's Fireflower
-
-^ The combination of having control over memory layout combined with a proper type system can enable some *really* cool things. Let's look at an example. A `HashSet` is an unordered collection of unique elements. It works very much like a `HashMap` where you only look at the keys and not the values. Rust implements `HashSet` as a thin wrapper on top of `HashMap`.
+![fit autoplay](surf.mov)
 
 ---
 
-```rust
-pub struct HashSet<K> {
-    map: HashMap<K, ()>
-}
-
-impl<K: Hash + Eq> HashSet<K> {
-    pub fn insert(&mut self, value: K) {
-        self.map.insert(value, ());
-    }
-
-    pub fn contains(&self, value: &K) -> bool {
-        self.map.contains_key(value)
-    }
-}
-```
-
-^ Rust's implementation uses an empty tuple, also known as "unit" for the values here. The value itself doesn't matter for this implementation to be correct. For example, in Ruby they use a boolean. Here's that code:
+![fit autoplay](encounter.mov)
 
 ---
 
-```ruby
-class Set
-  def initialize
-    @hash = {}
-  end
+# ...What?
 
-  def insert(value)
-    @hash[value] = true
-  end
-
-  def contains(value)
-    @hash.key?(value)
-  end
-end
-```
-
-^ While both implementations are correct, there's a big difference in what's going on from a performance perspective. Specifically, Rust is able to take advantage of the fact that the value is zero sized, and eliminate a bunch of code. How big a difference? About 10-20% faster. That's free performance, and you can take advantage of those same kind of gains just by understanding some of the guarantees that Rust can provide.
+^ If you've never seen this glitch before, this probably seems like an extremely random sequence of events for such a specific outcome. And it is, but let's break down each piece of this.
 
 ---
 
-# `char`
+# This glitch is not a single bug
+
+^ As with most major glitches, there's no *single* bug that's responsible here. This happens because of a bunch of different bugs, and in most cases you can't even really call them bugs -- just properties of the code being used in unexpected ways.
+
+---
+
+# Warning
+## This talk contains speculation
+
+^ I want to state up front, I did not work on this game nor have I interviewed the programmers who did. I think we can infer a lot about what was intended in the code, and the constraints they worked under. But I want to make it clear that a lot of this is speculation.
+
+---
+
+# What's up with that coast?
+
+---
+
+![inline](coast_tile_player.png)
+
+---
+
+![inline](coast_tile.png)
+
+---
+
+![inline](coast_tile_coords.png)
 
 ---
 
 ```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
 
+// check if random encounter happens from rate
 
-
-
-
-struct Foo {
-    bar: char,
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
 }
 ```
+
+---
+
+[.code-highlight: 1]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 2-8]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 10]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 12]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 13-17]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 1,12]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+![fit inline](coast_tile.png)
+
+---
+
+![fit](surf2.mov)
+
+---
+
+[.code-highlight: 1,12]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+# Rust isn't Assembly
+
+---
+
+[.code-highlight: 1,12]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 10]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+[.code-highlight: 1,12]
+
+```rust
+let tile = tile_at(9, 9);
+let encounter_rate = if tile.is_grass() {
+  current_area.grass_encounter_rate
+} else if tile.is_water() {
+  current_area.water_encounter_rate
+} else {
+  return;
+};
+
+// check if random encounter happens from rate
+
+let tile = tile_at(8, 9)
+if tile.is_water() {
+  perform_encounter(current_area.water_pokemon)
+} else {
+  peform_encounter(current_area.grass_pokemon)
+}
+```
+
+---
+
+# Could you write your whole program with only 4 global variables?
+
+---
+
+# But how is this useful?
+
+---
+
+![fit](trainer_trade.png)
+
+---
+
+![fit](placeholder1.jpg)
+
+---
+
+![fit](placeholder2.jpg)
+
+---
+
+![fit](placeholder3.jpg)
+
+---
+
+![fit](placeholder4.jpg)
+
+---
+
+![fit](placeholder5.jpg)
+
+---
+
+# IT'S ALL ZUBAT
+
+---
+
+![fit](oops_all_zubat.jpg)
+
+---
+
+![fit](too_many_zubats.png)
+![hide](zubat.mp3)
+
+---
+
+![fit](socially_distanced_zubats.png)
+
+---
+
+## (all images/video of pokemon after this slide will be wearing masks, but I haven't had time to edit them all in yet)
+
+---
+
+![fit](placeholder5.jpg)
+
+---
+
+![fit](trainer_trade.png)
+
+---
+
+![fit](placeholder6.jpg)
+
+---
+
+![fit](placeholder7.jpg)
+
+---
+
+![fit](oldman_name.png)
+
+---
+
+![fit](placeholder8.jpg)
+
+---
+
+![fit](placeholder9.jpg)
+
+---
+
+# What is a MissingNo
+
+^ So let's talk about what a MissingNo actually is. Contrary to what you might think, it's not a single pokemon. There are actually 39 distinct Pokemon which are all called MissingNo. It's not just reading garbage data.
+
+---
+
+![inline](missingno_encounter.png)
+
+^ Even though its sprite is clearly garbage data, it has a well defined name, and a lot of other attributes. To understand why some of its attributes are garbage, but others aren't, we need to see how pokemon are stored in the code.
+
+---
+
+![inline](pokedex.png)
+
+^ When most people think of a list of pokemon, they think of the order they appear in the pokedex -- the in game encyclopaedia. Every pokemon has a number associated with it, and they're loosly ordered in the order you would encounter them. But that's not how they're stored in the game. This is the pokemon with the internal id of 1
+
+---
+
+![inline](rhydon.png)
+
+^ In the code, most of the data related to pokemon is stored in the order the pokemon were created. The game was originally supposed to have 190 pokemon, but it shipped with 151. MissingNo is what's stored in slots where the cut pokemon were supposed to be. For the most part, the entries for MissingNo are always zeroed out, but there are some exceptions like its name. So for anything ordered by internal ID, we get well defined (but zeroed) data. But for anything stored in dex order, we get garbage.
 
 ---
 
 ```rust
-
-
-
-
-
-struct Foo {
-    bar: char,
-    baz: char,
+let dex_id = 0u8;
+let index = dex_id - 1; // underflows to 255
+unsafe {
+  // MON_DATA has 151 entries, so this is a buffer overrund
+  let data = MON_DATA.get_unchecked(index)
 }
 ```
 
----
-
-```rust
-
-
-
-
-
-enum Foo {
-    Bar(char),
-}
-```
+^ The "pokemon base stats" table, which includes the pointer to the sprite, is an example of something stored in dex order.
 
 ---
 
-```rust, [.highlight: 7]
-
-
-
-
-
-enum Foo {
-    Bar(char),
-    Baz,
-}
-```
-
----
-
-# `struct Baz;`
-
----
+[.code-highlight: 1]
 
 ```rust
-
-
-
-
-
-enum Foo {
-    Bar(char),
-    Baz,
+let dex_id = 0u8;
+let index = dex_id - 1; // underflows to 255
+unsafe {
+  // MON_DATA has 151 entries, so this is a buffer overrund
+  let data = MON_DATA.get_unchecked(index)
 }
 ```
 
----
-
-```rust, [.highlight: 7]
-
-
-
-
-
-enum Foo {
-    Bar(char),
-    Baz(u64),
-}
-```
+^ First, the game looks up what a pokemon's pokedex number is from its internal ID, which is 0 for missingno.
 
 ---
+
+[.code-highlight: 2]
 
 ```rust
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
+let dex_id = 0u8;
+let index = dex_id - 1; // underflows to 255
+unsafe {
+  // MON_DATA has 151 entries, so this is a buffer overrund
+  let data = MON_DATA.get_unchecked(index)
 }
 ```
 
----
+^ Since pokedex entries start at 1, it subtracts 1 from this number, causing us to underflow. So the index we're using is 255.
 
-```rust, [.highlight: 9]
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
-}
-```
 
 ---
 
-```rust, [.highlight: 5-8]
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
-}
-```
-
----
-
-```rust, [.highlight: 6]
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
-}
-```
-
----
-
-```rust, [.highlight: 7]
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
-}
-```
-
----
-
-```
-error[E0072]: recursive type `ListString` has infinite size
- --> src/main.rs:1:1
-  |
-1 | enum ListString {
-  | ^^^^^^^^^^^^^^^ recursive type has infinite size
-...
-4 |         tail: ListString,
-  |         ---------------- recursive without indirection
-  |
-  = help: insert indirection (e.g., a `Box`, `Rc`, or `&`)
-    at some point to make `ListString` representable
-```
-
----
+[.code-highlight: 3-6]
 
 ```rust
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: ListString,
-    },
-    Nil,
-}
-```
-
----
-
-```rust, [.highlight: 7]
-
-
-
-
-enum ListString {
-    Cons {
-        head: char,
-        tail: Box<ListString>,
-    },
-    Nil,
-}
-```
-
----
-
-```rust
-
-
-
-
-pub struct Cons<Tail> {
-    head: char,
-    tail: Tail,
-}
-
-pub struct Nil;
-```
-
----
-
-```rust
-
-
-
-
-
-
-struct Pizza<Topping> {
-    topping: Topping
-}
-```
-
----
-
-```rust
-
-
-
-struct Pinapple;
-
-struct Pizza<Topping> {
-    topping: Topping
-}
-
-size_of::<Pizza<Pinapple>>()
-```
-
----
-
-```rust
-
-
-
-struct Pinapple;
-
-struct Pizza<Topping> {
-    topping: Topping
-}
-
-size_of::<Pizza<Pinapple>>() // => Error:
-// Pineapple doesn't go on pizza, Steve. Fite me.
-```
-
----
-
-```rust
-
-
-
-
-
-struct Pizza<Topping> {
-    topping: Topping
-}
-
-size_of::<Pizza<u8>>()
-```
-
-^ If you had a pizza with a hole in it... (get it? Because it's topping is a byte)
-
----
-
-```rust
-
-
-
-
-pub struct Cons<Tail> {
-    head: char,
-    tail: Tail,
-}
-
-pub struct Nil;
-```
-
----
-
-# `Nil`
-
----
-
-# `Cons<Nil>`
-
----
-
-# `Cons<Cons<Nil>>`
-
----
-
-# `Cons<Cons<Cons<Nil>>>`
-
----
-
-```rust
-
-
-
-
-pub struct Cons<Tail> {
-    head: char,
-    tail: Tail,
-}
-
-pub struct Nil;
-```
-
-
----
-
-# This isn't without tradeoffs
-
----
-
-
-```rust
-
-
-
-
-
-
-fn do_stuff_with_string(s: ListString) {
-    // doing stuff!
-}
-```
-
----
-
-```rust
-
-
-
-
-
-
-fn do_stuff_with_string<T: ListString>(s: T) {
-    // doing stuff!
-}
-```
-
----
-
-```rust
-
-
-
-
-fn string_contains_a(s: ListString) -> bool {
-    match s {
-        Cons { head: 'a', .. } => true,
-        Cons { tail, .. } => string_contains_a(tail),
-        Nil => false,
-    }
-}
-```
-
----
-
-```rust
-
-
-
-
-fn string_contains_a<T: ListString>(s: T) -> bool {
-    match s.unpack() {
-        Some(('a', _)) => true,
-        Some((_, tail)) => string_contains_a(tail),
-        None => false,
-    }
-}
-```
-
----
-
-![inline](ruby-i32.jpg)
-
----
-
-```rust
-
-
-
-
-trait Robot {
-    fn username(&self) -> &str;
-}
-
-fn say_hi<T: Robot>(robot: &T) {
-    println!("Hi, {}", robot.username());
-}
-```
-
----
-
-```rust
-struct Bors;
-
-impl Robot for Bors {
-    fn username(&self) -> &str {
-        "@bors"
-    }
-}
-```
-
----
-
-```rust
-struct Bors;
-
-impl Robot for Bors {
-    fn username(&self) -> &str {
-        "@bors"
-    }
-}
-
-struct Alex;
-
-impl Robot for Alex {
-    fn username(&self) -> &str {
-        "@alexcrichton"
-    }
-}
-```
----
-
-```rust, [.highlight: 3-7]
-struct Bors;
-
-impl Robot for Bors {
-    fn username(&self) -> &str {
-        "@bors"
-    }
-}
-
-struct Alex;
-
-impl Robot for Alex {
-    fn username(&self) -> &str {
-        "@alexcrichton"
-    }
-}
-```
-
----
-
-```rust, [.highlight: 3-5]
-struct Bors;
-
-fn Robot_username_Bors(_: &Bors) -> &str {
-    "@bors"
-}
-
-struct Alex;
-
-impl Robot for Alex {
-    fn username(&self) -> &str {
-        "@alexcrichton"
-    }
-}
-```
-
----
-
-```rust, [.highlight: 9-13]
-struct Bors;
-
-fn Robot_username_Bors(_: &Bors) -> &str {
-    "@bors"
-}
-
-struct Alex;
-
-impl Robot for Alex {
-    fn username(&self) -> &str {
-        "@alexcrichton"
-    }
-}
-```
-
----
-
-```rust, [.highlight: 9-11]
-struct Bors;
-
-fn Robot_username_Bors(_: &Bors) -> &str {
-    "@bors"
-}
-
-struct Alex;
-
-fn Robot_username_Alex(_: &Alex) -> &str {
-    "@alexcrichton"
-}
-```
-
----
-
-```rust
-
-
-
-
-
-
-fn say_hi<T: Robot>(robot: &T) {
-    println!("Hi, {}", robot.username());
-}
-```
-
----
-
-```rust
-
-
-
-fn say_hi_Bors(bors: &Bors) {
-    println!("Hi, {}", Robot_username_Bors(bors));
-}
-
-fn say_hi_Alex(alex: &Alex) {
-    println!("Hi, {}", Robot_username_Alex(alex));
-}
-```
-
----
-
-```rust, [.highlight: 3-5]
-
-
-
-fn say_hi_Bors(bors: &Bors) {
-    println!("Hi, {}", Robot_username_Bors(bors));
-}
-
-fn say_hi_Alex(alex: &Alex) {
-    println!("Hi, {}", Robot_username_Alex(alex));
-}
-```
-
----
-
-```rust, [.highlight: 3-5]
-
-
-
-fn say_hi_Bors(_: &Bors) {
-    println!("Hi, {}", "@bors");
-}
-
-fn say_hi_Alex(alex: &Alex) {
-    println!("Hi, {}", Robot_username_Alex(alex));
-}
-```
-
----
-
-```rust, [.highlight: 7-9]
-
-
-
-fn say_hi_Bors(_: &Bors) {
-    println!("Hi, {}", "@bors");
-}
-
-fn say_hi_Alex(alex: &Alex) {
-    println!("Hi, {}", Robot_username_Alex(alex));
-}
-```
-
----
-
-```rust, [.highlight: 7-9]
-
-
-
-fn say_hi_Bors(_: &Bors) {
-    println!("Hi, {}", "@bors");
-}
-
-fn say_hi_Alex(_: &Alex) {
-    println!("Hi, {}", "@alexcrichton");
-}
-```
-
-^ As with all things in programming, there is a tradeoff here. In this case the cost that we're paying for the compiler to generate more efficient code is that it's increasing the size of our binary, and likely increasing compilation times as well. In some cases you can opt out of this if you'd rather not pay that cost.
-
----
-
-```rust
-
-
-
-
-
-fn say_hi(robot: &Robot) {
-    println!("Hi, {}", robot.username());
-}
-```
-
-^ By taking a reference to Robot, we're taking what's called a trait object. This is also sometimes referred to as "type erasure". When we take a trait object, the compiler no longer knows anything about the actual type being passed. This means that it can't do monomorphization, and the function won't be able to get optimized beyond this.
-
----
-
-![fit](ruby-bottle.jpg)
-
----
-
-# A real world example
-
----
-
-```rust
-
-
-
-
-#[test]
-fn complex_queries_with_no_data_have_no_size() {
-    assert_eq!(0, mem::size_of_val(&users.as_query()));
-    assert_eq!(0, mem::size_of_val(&users.select(id).as_query()));
-    assert_eq!(0, mem::size_of_val(
-        &users.inner_join(posts).filter(name.eq(title))
-    ));
-}
-```
-
----
-[.build-lists: true]
-
-## List of things you can do with a 0-size type
-
-- 
-
----
-
-# `users.find(1)`
-
----
-
-```
-SelectStatement<
-    users::table,
-    DefaultSelectClause,
-    NoDistinctClause,
-    WhereClause<
-        Eq<
-            users::id,
-            Bound<Integer, i32>,
-        >,
-    >,
-    NoOrderClause,
-    NoLimitClause,
-    NoOffsetClause,
-    NoGroupByClause,
->
-```
-
-^ In the interest of keeping things a size that fits on a slide, we're going to omit a lot this code. We'll pretend that our type only looks like this instead
-
----
-
-```
-SelectStatement<
-    users::table,
-    DefaultSelectClause,
-    NoDistinctClause,
-    WhereClause<
-        Eq<
-            users::id,
-            Bound<Integer, i32>,
-        >,
-    >,
->
-```
-
----
-
-```rust
-SelectStatement {
-    select: DefaultSelectClause,
-    from: users::table,
-    distinct: NoDistinctClause,
-    where_clause: WhereClause(Eq {
-        left: users::id,
-        right: Bound::new(1),
-    }),
-}
-```
-
----
-
-```rust
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.distinct.walk_ast(out)?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 2]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.distinct.walk_ast(out)?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
-^ This first line says "Add this SQL string to the query being constructed". The definition of `push_sql` is going to get inlined, but we're going to leave this alone for now and come back to it later.
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.distinct.walk_ast(out)?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    NoDistinctClause::walk_ast(out)?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    Ok(())?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 999]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    DefaultSelectClause::walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3-4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.from.default_selection()
-        .walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.from.default_selection()
-        .walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    (users::id, users::name)
-        .walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3-4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    (users::id, users::name)
-        .walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3-10]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    if 0 != 0 {
-        out.push_sql(", ");
-    }
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    if 0 != 0 {
-        out.push_sql(", ");
-    }
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    if false {
-        out.push_sql(", ");
-    }
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 3-5]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    if false {
-        out.push_sql(", ");
-    }
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 999]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    if 1 != 0 {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    if true {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 4-6]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    if true {
-        out.push_sql(", ");
-    }
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::id.walk_ast(out)?;
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3-5]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_identifier("users");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
+let dex_id = 0u8;
+let index = dex_id - 1; // underflows to 255
+unsafe {
+  // MON_DATA has 151 entries, so this is a buffer overrund
+  let data = MON_DATA.get_unchecked(index)
 }
-```
-
----
-
-```rust, [.highlight: 3-5]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql(&"users".replace('"', "\"\""));
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql(&"users".replace('"', "\"\""));
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
-
----
-
-```rust, [.highlight: 6]
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-```
-
----
-
-```rust, [.highlight: 5-7]
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql(&"id".replace('"', "\"\""));
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
 ```
 
+^ But the array we're indexing into only has 151 items in it, so we read way past the end of the array. In the case of the data that has the sprite, where it ends up is in the middle of the data for some trainer's parties on Route 17, which when interpreted as a pointer points to some random code related to the safari zone. The glitched sprite you see is what happens if you interpret that code as an image.
 
 ---
-
-```rust, [.highlight: 6]
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql(&"id".replace('"', "\"\""));
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
 
----
+![inline](missingno_dex_entry.png)
 
-```rust, [.highlight: 6]
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
+^ But most data isn't stored in pokedex order, so we mostly get valid data. Ironically, the pokedex itself is one of the things that isn't stored in pokedex order, so MissingNo even has a valid pokedex entry... almost. Its entry wasn't localized, and the structure is slightly different than the Japanese version, but if we look at the Japanese entry we can see the valid data.
 
 ---
 
-```rust, [.highlight: 9]
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-```
+![inline](missingno_dex_entry_japanese.png)
 
-^ Let's scroll down to give ourselves a bit of room (3 slides)
+^ MissingNo is the "???" pokemon, it has a placeholder height and weight, and that comment translated to "comment to be written". There are some differences between the different MissingNos though.
 
 ---
-
-```rust, [.highlight: 7]
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+![inline](missingno_ghost.png)
+![inline](missingno_kabutops_fossil.png)
+![inline](missingno_aerodactyl_fossil.png)
 
-```rust, [.highlight: 5]
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
+^ In fact, many of the MissingNos have unique data. 9 of them have cries that aren't 0s. A few of these entries were also used for some special cases where they needed to show pokemon sprites that weren't attached to real pokemon. These would only show up if you had a lower case w, x, or y in your name though, so most folks never saw them.
 
 ---
-
-```rust, [.highlight: 4]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::name.walk_ast(out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+# Which versions you saw were based on your name
 
-```rust, [.highlight: 4-6]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("name");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
+^ This is why you would see high level real pokemon in addition to missingno. Printable characters start at 128 in their text encoding, so no matter what your name was, the characters that mapped to levels would be higher than they're supposed to. You could also get some glitched trainer battles, but those only appeared if you had punctuation in your name, so most people were unaware. Now you might be asking... If the encounter table was based on your name,
 
 ---
-
-```rust, [.highlight: 4]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("name");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+# Why could everyone perform this glitch?
 
-```rust, [.highlight: 4-6]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("name");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-```
+^ Why could everyone do the glitch? Surely it would be possible to have a name that didn't map to MissingNo at all? And this is sorta true, it was possible to have a name that didn't include missingno. But even if that was the case, you could still get 128 rare candies, and it was pretty unlikely you'd have a name that didn't include MissingNo, for a few reasons
 
 ---
 
-```rust, [.highlight: 8]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("name");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-```
-
----
+# The end of name marker mapped to MissingNo
 
-```rust, [.highlight: 8-10]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
+^ The control character used for the end of your name was stored as 80 in decimal, which is one of the IDs of MissingNo. So if your name was an even number of characters, you could always encounter MissingNo
 
 ---
 
-```rust, [.highlight: 12]
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-```
+# Every built in name had the right characters
 
-^ And I'm already out of space again (4 slides)
+^ A lot of players didn't even pick their own name, they just used one of the preset ones the game offered you. By pure luck, every single one of these names has the right characters for MissingNo.
 
 ---
-
-```rust, [.highlight: 10]
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-```
 
----
+# The MissingNo characters were common
 
-```rust, [.highlight: 8]
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
+^ The characters that mapped to MissingNo included upper case S, H, and M, and most lower case vowels. The odds of you having one of these in the right place were really high. But even then, there was a catch all.
 
 ---
-
-```rust, [.highlight: 6]
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+![inline]('m.png)
 
-```rust, [.highlight: 4]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
+^ Every custom name could at least encounter MissingNo's sister, 'M. Even though they have the same sprite, 'M is different. For starters, you can clearly see that the name is garbage data. The graphics that appear there will be based on things like your party's stats or your position on the map. 'M is what you get for internal ID 0, so *everything* about it is garbage data.
 
 ---
 
-```rust, [.highlight: 4-6]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
+![inline]('m.png)
 
-```rust, [.highlight: 7]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
+^ 'M had some interesting differences. Its cry will randomly change based on what screen you're on, and it could evolve into Khangaskan. You could also lock up your game by catching it. But if your goal was just to get 128 rare candies, it didn't matter if you saw MissingNo or 'M.
 
 ---
-
-```rust, [.highlight: 7-8]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+# How you get your rare candies
 
-```rust, [.highlight: 8]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.walk_ast(out)?;
-    Ok(())
-}
-```
+^ So now let's talk about why the 6th item in your inventory gets duplicated. This has to do with what happens after you encounter a pokemon.
 
 ---
 
-```rust, [.highlight: 8-10]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.left.walk_ast(out)?;
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
+![inline](pokedex.png)
 
-```rust, [.highlight: 8]
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.left.walk_ast(out)?;
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
+^ This all has to do with that pokedex we mentioned earlier. Its function in the game is to keep track of every pokemon you've seen or caught. Any pokemon that appears on this list is one that you've seen, and the little ball icon means it's been caught. This is stored in memory as a bitmap, one bit per pokemon. As you might have guessed, this is stored in pokedex order. When you encounter missingno, it tries to mark that you've encountered a hypothetical 256th pokemon. Since there are only 151 in the game, this ends up writing past the space used for this.
 
 ---
-
-```rust, [.highlight: 6]
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.left.walk_ast(out)?;
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+![inline](inventory.png)
 
-```rust, [.highlight: 4]
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    self.where_clause.0.left.walk_ast(out)?;
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
+^ Immediately after your pokedex data in RAM is your inventory. It ends up setting the high bit of the 13th byte after the end of your pokedex. The inventory is stored as 1 byte for the number of items in your inventory, followed by 1 byte for each item's ID and then 1 byte for the quantity. This means the byte it writes to is the quantity of the 6th item in your inventory. Or to put it another way, it adds 128 of that item, as long as you had less than 128 before.
 
 ---
 
-```rust, [.highlight: 2]
-    out.push_sql(" WHERE ");
-    self.where_clause.0.left.walk_ast(out)?;
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
+# MissingNo also corrupted the Hall of Fame
 
-```rust, [.highlight: 2-4]
-    out.push_sql(" WHERE ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
+^ If you had beaten the game when you performed this glitch, you'd also find that the place where it stored the team you beat the game with was corrupted. This is caused by MissingNo's sprite. Remember when I pointed out that the pause at the start of the fight was abnormally long? This is why. Due to the amount of space needed, sprites get decompressed on the cartridge's storage instead of the console's RAM. The space they use is large enough for 7x7 sprites, the largest in the game. But the data it tries to read says it's 13x13, so they write way past the end of that buffer, and overwrite the Hall of Fame. The data it was overwritten with was consistent for everybody.
 
 ---
-
-```rust, [.highlight: 2]
-    out.push_sql(" WHERE ");
-    users::table.walk_ast(out)?;
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+# The sprite decompression was only meant to handle trusted input
 
-```rust, [.highlight: 2-4]
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
+^ This bug would have been avoided if there was some bounds checking in sprite decompression. But everything in this game was optimized for code size, and if you're only dealing with a known set of trusted inputs, omitting those seems perfectly reasonable. The only reason the code misbehaved was because of an unrelated bug causing it to get garbage data.
 
 ---
 
-```rust, [.highlight: 6]
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_identifier("id");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
-
----
+# Not everything you heard was true
 
-```rust, [.highlight: 6-8]
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
+^ And those are the only two abnormal effects of the encounter. But there were a lot of things you may have heard that are untrue or only half true.
 
 ---
-
-```rust, [.highlight: 10]
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(" = ");
-    self.where_clause.0.right.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+# MissingNo was safe to catch
 
-```rust, [.highlight: 10-11]
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(" = ");
-    out.push_bind_param(
-        &self.where_clause.0.right.item)?;
-    Ok(())
-```
+^ The biggest piece of misinformation you probably heard was "don't catch MissingNo or it'll corrupt your save". This is just straight up false.
 
 ---
-
-```rust
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    self.distinct.walk_ast(out)?;
-    self.select.walk_ast(&self.from, out)?;
-    out.push_sql(" FROM ");
-    self.from.walk_ast(out)?;
-    self.where_clause.walk_ast(out)?;
-    Ok(())
-}
-```
 
----
+![inline](missingno_fight.png)
 
-```rust
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(", ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("name");
-    out.push_sql("\"");
-    out.push_sql(" FROM ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(" WHERE ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-    out.push_sql(" = ");
-    out.push_bind_param(&self.where_clause.0.right.item, out)?;
-    Ok(())
-}
-```
+^ There's really no ill effects of catching MissingNo, and there's nothing about it that can't be saved normally. I think the source of this misinformation is a very specific problem that can arise with 'M. In the games you can bring up to 6 pokemon with you, and if you catch one when your party is full, it gets sent to storage. When you open up the storage system, the game has to re-compute the stored pokemon's stats. There's a bug in this calculation that will cause an infinite loop if it tries to compute them for a level 0 pokemon. Since everyone with a custom name could encounter a level 0 'M, and it probably went to storage if you caught it, I believe this is the source of that rumor.
 
 ---
-
-```rust, [.highlight: 2]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    out.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-```
 
----
+# MissingNo wouldn't corrupt your graphics
 
-```rust, [.highlight: 2-4]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    if let AstPass::ToSql(ref mut builder) = out {
-        builder.push_sql("SELECT ");
-    }
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-```
+^ Another thing you might have heard is that catching MissingNo will cause all sorts of graphical glitches. Nintendo even put out a statement saying to try releasing it to fix scrambled graphics, and if that doesn't work, you need to restart your game. All of this is nonsense.
 
 ---
-
-```rust, [.highlight: 2-3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    let AstPass::ToSql(ref mut builder) = out;
-    builder.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-```
 
----
+![inline](scrambled_battle.png)
 
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    let AstPass::ToSql(ref mut builder) = out;
-    builder.push_sql("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-```
+^ There's a specific mirroring effect you can cause if you view the stats screen for missingno, but it only affects a specific sprite and it goes away if you view the stats screen for any normal pokemon. There were some bigger glitches if you had MissingNo in the follow up game Pokemon Yellow, but the glitch that let you encounter MissingNo was fixed in that game.
 
 ---
-
-```rust, [.highlight: 3]
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    let AstPass::ToSql(ref mut builder) = out;
-    builder.sql.push_str("SELECT ");
-    out.push_sql("\"");
-    out.push_sql("users");
-    out.push_sql("\"");
-    out.push_sql(".");
-    out.push_sql("\"");
-    out.push_sql("id");
-    out.push_sql("\"");
-```
 
----
+# Encountering MissingNo wouldn't save your game
 
-```rust
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    let AstPass::CollectBinds { collector, metadata_lookup } = out;
-    collector.push_bound_value(
-        &self.where_clause.0.right.value,
-        metadata_lookup,
-    )?;
-    Ok(())
-}
-```
+^ I'm surprised this rumor even got started since it's so easy to verify as false. I think the source of this one was an N64 game called Pokemon Stadium. It included a feature where you could play the pokemon games on the TV, and it'd display "Saved" on the screen whenever anything was written to persistent storage. This would mean the hall of fame corruption would make that appear on screen if you were playing on the N64.
 
 ---
-
-```rust
-fn walk_ast(&self, out: AstPass) -> QueryResult<()> {
-    Ok(())
-}
-```
 
----
+# Small code quirks add up to big glitches
 
-# These optimizations are what let us build zero cost abstractions
+^ So now that we've seen every piece of this glitch, we can see that it was really just a bunch of small, seemingly benign interactions between unrelated bits of code. No individual piece of this glitch stands out to me as insane or something that obviously would have been stopped in code review.
 
 ---
-
-```rust
-pub struct HashSet<K> {
-    map: HashMap<K, ()>
-}
 
-impl<K: Hash + Eq> HashSet<K> {
-    pub fn insert(&mut self, value: K) {
-        self.map.insert(value, ());
-    }
-
-    pub fn contains(&self, value: &K) -> bool {
-        self.map.contains_key(value)
-    }
-}
-```
+# Would you have foreseen these interactions?
 
-^ At the beginning of this talk I mentioned that using unit instead of bool was 10-20% faster, but I glossed over why that is the case. The reason is because the compiler knows that this value with 0 bytes can never be used. All of the generic code responsible for storing the values of a hash map is guaranteed to be eliminated, leaving us with the same code we'd have if we wrote a super-optimized specific hashset ourselves.
+^ When you combine all of this together, you get one of the most famous glitches of all time. But it's not the result of some horrendously bad coding or lack of QA. Every piece of this glitch was relatively benign, or due to completely unrelated parts of the code base interacting in unexpected ways. And this was hand written in assembly under massive space constraints, every instruction mattered. I certainly wouldn't have done better than they did, and I don't think anyone watching this would either.
 
 ---
-
-```rust
-pub struct HashSet<K> {
-    map: HashMap<K, ()>
-}
 
-impl<K: Hash + Eq> HashSet<K> {
-    pub fn insert(&mut self, value: K) {
-        self.map.insert(value, ());
-    }
-
-    pub fn contains(&self, value: &K) -> bool {
-        self.map.contains_key(value)
-    }
-}
-```
-
-^ In theory the compiler could do the same optimization because it's just able to see that the values are never used. The use of a zero-sized type doesn't necessarily enable any optimizations that weren't possible before. However, they do *guarantee* that they will occur.
-
----
+# Pokemon Blue wasn't "completely broken"
 
-![inline](shopify.png)
+^ A phrase I've heard from folks making fun of the glitches in this game is "completely broken", and I think we should just remove that from our vocabularies. In this case and many others, it's likely the software was developed under some constraints we're not aware of, and we wouldn't do better in the same circumstances
 
 ---
 
-# Please ask me questions now
+# I'm really glad we don't hand roll assembly anymore
 
-![fit](ruby-is-watching.jpg)
+^ To me a lot of this glitch just boils down to "because assembly". It's easy for us to take the technologies we have at our disposal today for granted. Today code size is rarely a hard constraint, and only matters because of CPU caches. We run our code on machines powerful enough we can include all sorts of safety checks and never give it another thought. But in 1996 "just use Rust" wasn't an option. Even just using C wasn't an option.
 
 ---
 
-# Contact
+# Contact Info
 
-- twitter: @sgrif
-- github: @sgrif
-- podcast: bikeshed.fm
+- Twitter: @sgrif
+- Github: @sgrif

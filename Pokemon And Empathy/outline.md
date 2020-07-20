@@ -172,20 +172,18 @@ Getting the glitched encounter
   - ```rust
     let tile = tile_at(9, 9);
     let encounter_rate = if tile.is_grass() {
-      Some(current_area.grass_encounter_rate)
+      current_area.grass_encounter_rate
     } else if tile.is_water() {
-      Some(current_area.watter_encounter_rate)
+      current_area.watter_encounter_rate
     } else {
-      None
+      return;
     };
 
-    if let Some(encounter_rate) = encounter_rate {
-      let tile = tile_at(8, 9)
-      if tile.is_water() {
-        perform_encounter(current_area.water_pokemon)
-      } else {
-        peform_encounter(current_area.grass_pokemon)
-      }
+    let tile = tile_at(8, 9)
+    if tile.is_water() {
+      perform_encounter(current_area.water_pokemon)
+    } else {
+      peform_encounter(current_area.grass_pokemon)
     }
     ```
     - We lose something subtle by translating this to a high level language like
@@ -254,3 +252,16 @@ Random pokemon notes
 
 - The anime and games have used the same voice actress for Pikachu since 1997,
   and she has appeared in more episodes of the anime than anybody else
+
+Things that we almost certainly won't have time for in the talk, but maybe do a followup blog post about
+---
+
+- Most of the places where there are large gaps of unused memory are in sram. I
+  suspect this was because using sram was far more difficult than wram since
+  you have to deal with bank switching
+- It looks like they ultimately failed at avoiding increasing the cartridge
+  size. Nearly half of the ROM on the cartridge is unused (banks 0x2D-0x3F are
+  unused, they would have needed to fit in 0x20 banks to go down a size). I
+  can't find a disassembly or ROM map for green, but I'll bet green did fit on
+  the next size down. You're not going to rewrite your whole app to take
+  advantage of the doubled size when the goal is to localize it.
