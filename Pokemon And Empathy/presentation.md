@@ -62,7 +62,7 @@
 
 ![fit autoplay](oldman.mov)
 
-^ FIXME: If there's time, re-record with audio
+^ We start of in Viridian City, one of the earliest areas in the game. We're going to talk to this old man and tell him we're not in a hurry.
 
 ---
 
@@ -97,6 +97,12 @@
 
 ---
 
+# Let's break this glitch down
+
+^ With that out of the way, let's start going through each of the pieces of this glitch. 
+
+---
+
 # What's up with that coast?
 
 ---
@@ -116,20 +122,20 @@
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -140,20 +146,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -164,20 +170,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -188,20 +194,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -212,20 +218,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -236,20 +242,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -260,20 +266,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -283,7 +289,7 @@ if tile.is_water() {
 
 ---
 
-![fit](surf2.mov)
+![fit autoplay](surf2.mov)
 
 ---
 
@@ -292,20 +298,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -320,20 +326,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -344,20 +350,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -368,20 +374,20 @@ if tile.is_water() {
 ```rust
 let tile = tile_at(9, 9);
 let encounter_rate = if tile.is_grass() {
-  current_area.grass_encounter_rate
+  current_area.grass_encounters.rate
 } else if tile.is_water() {
-  current_area.water_encounter_rate
+  current_area.water_encounters.rate
 } else {
   return;
 };
 
 // check if random encounter happens from rate
 
-let tile = tile_at(8, 9)
+let tile = tile_at(8, 9);
 if tile.is_water() {
-  perform_encounter(current_area.water_pokemon)
+  perform_encounter(current_area.water_encounters.pokemon)
 } else {
-  peform_encounter(current_area.grass_pokemon)
+  peform_encounter(current_area.grass_encounters.pokemon)
 }
 ```
 
@@ -395,27 +401,56 @@ if tile.is_water() {
 
 ---
 
-![fit](trainer_trade.png)
+```rust
+let grass_encounter_rate = GRASS_ENCOUNTERS[area_id].rate;
+if grass_encounter_rate > 0 {
+  current_area.grass_encounters = GRASS_ENCOUNTERS[area_id];
+}
+```
 
 ---
 
-![fit](placeholder1.jpg)
+[.code-highlight: 1]
+
+```rust
+let grass_encounter_rate = GRASS_ENCOUNTERS[area_id].rate;
+if grass_encounter_rate > 0 {
+  current_area.grass_encounters = GRASS_ENCOUNTERS[area_id];
+}
+```
 
 ---
 
-![fit](placeholder2.jpg)
+[.code-highlight: 2-5]
+
+```rust
+let grass_encounter_rate = GRASS_ENCOUNTERS[area_id].rate;
+if grass_encounter_rate > 0 {
+  current_area.grass_encounters = GRASS_ENCOUNTERS[area_id];
+}
+```
 
 ---
 
-![fit](placeholder3.jpg)
+# We can keep the grass encounters from other areas
+
+^ And that's why we specifically do this on Cinnabar Island. Because we can fast travel to any town, it's easy for us to get to this coast in particular without ever passing through an area with grass pokemon
 
 ---
 
-![fit](placeholder4.jpg)
+![fit inline](trainer_trade.png)
 
 ---
 
-![fit](placeholder5.jpg)
+![fit inline](encounter_table.png)
+
+---
+
+![fit inline](mt_moon_encounter_table_2.m4v)
+
+---
+
+![fit inline](mt_moon_encounter_table_4.png)
 
 ---
 
@@ -436,35 +471,23 @@ if tile.is_water() {
 
 ---
 
-## (all images/video of pokemon after this slide will be wearing masks, but I haven't had time to edit them all in yet)
+![fit inline](mt_moon_encounter_table_5.png)
 
 ---
 
-![fit](placeholder5.jpg)
+![fit inline](trainer_trade.png)
 
 ---
 
-![fit](trainer_trade.png)
+![fit inline](trainer_encounter_table.m4v)
 
 ---
 
-![fit](placeholder6.jpg)
+![fit](oldman_masked.png)
 
 ---
 
-![fit](placeholder7.jpg)
-
----
-
-![fit](oldman_name.png)
-
----
-
-![fit](placeholder8.jpg)
-
----
-
-![fit](placeholder9.jpg)
+![fit inline](hisean_encounter_table.m4v)
 
 ---
 
@@ -474,7 +497,7 @@ if tile.is_water() {
 
 ---
 
-![inline](missingno_encounter.png)
+![inline](missingno_encounter_masks.png)
 
 ^ Even though its sprite is clearly garbage data, it has a well defined name, and a lot of other attributes. To understand why some of its attributes are garbage, but others aren't, we need to see how pokemon are stored in the code.
 
@@ -486,7 +509,7 @@ if tile.is_water() {
 
 ---
 
-![inline](rhydon.png)
+![inline](rhydon_mask.png)
 
 ^ In the code, most of the data related to pokemon is stored in the order the pokemon were created. The game was originally supposed to have 190 pokemon, but it shipped with 151. MissingNo is what's stored in slots where the cut pokemon were supposed to be. For the most part, the entries for MissingNo are always zeroed out, but there are some exceptions like its name. So for anything ordered by internal ID, we get well defined (but zeroed) data. But for anything stored in dex order, we get garbage.
 
@@ -496,7 +519,7 @@ if tile.is_water() {
 let dex_id = 0u8;
 let index = dex_id - 1; // underflows to 255
 unsafe {
-  // MON_DATA has 151 entries, so this is a buffer overrund
+  // MON_DATA has 151 entries, so this is a buffer overrun
   let data = MON_DATA.get_unchecked(index)
 }
 ```
@@ -511,7 +534,7 @@ unsafe {
 let dex_id = 0u8;
 let index = dex_id - 1; // underflows to 255
 unsafe {
-  // MON_DATA has 151 entries, so this is a buffer overrund
+  // MON_DATA has 151 entries, so this is a buffer overrun
   let data = MON_DATA.get_unchecked(index)
 }
 ```
@@ -526,7 +549,7 @@ unsafe {
 let dex_id = 0u8;
 let index = dex_id - 1; // underflows to 255
 unsafe {
-  // MON_DATA has 151 entries, so this is a buffer overrund
+  // MON_DATA has 151 entries, so this is a buffer overrun
   let data = MON_DATA.get_unchecked(index)
 }
 ```
@@ -542,7 +565,7 @@ unsafe {
 let dex_id = 0u8;
 let index = dex_id - 1; // underflows to 255
 unsafe {
-  // MON_DATA has 151 entries, so this is a buffer overrund
+  // MON_DATA has 151 entries, so this is a buffer overrun
   let data = MON_DATA.get_unchecked(index)
 }
 ```
@@ -563,9 +586,9 @@ unsafe {
 
 ---
 
-![inline](missingno_ghost.png)
-![inline](missingno_kabutops_fossil.png)
-![inline](missingno_aerodactyl_fossil.png)
+![inline](missingno_ghost_mask.png)
+![inline](missingno_kabutops_fossil_mask.png)
+![inline](missingno_aerodactyl_fossil_mask.png)
 
 ^ In fact, many of the MissingNos have unique data. 9 of them have cries that aren't 0s. A few of these entries were also used for some special cases where they needed to show pokemon sprites that weren't attached to real pokemon. These would only show up if you had a lower case w, x, or y in your name though, so most folks never saw them.
 
@@ -601,15 +624,27 @@ unsafe {
 
 ---
 
-![inline]('m.png)
+![inline]('m_mask_2.png)
 
-^ Every custom name could at least encounter MissingNo's sister, 'M. Even though they have the same sprite, 'M is different. For starters, you can clearly see that the name is garbage data. The graphics that appear there will be based on things like your party's stats or your position on the map. 'M is what you get for internal ID 0, so *everything* about it is garbage data.
+^ Every custom name could at least encounter MissingNo's sister, 'M. We call it that because those are the only characters in its name you can say.
 
 ---
 
-![inline]('m.png)
+![inline]('m_mask_circle.png)
 
-^ 'M had some interesting differences. Its cry will randomly change based on what screen you're on, and it could evolve into Khangaskan. You could also lock up your game by catching it. But if your goal was just to get 128 rare candies, it didn't matter if you saw MissingNo or 'M.
+^ Even though they have the same sprite, 'M is different. As you can probably tell from the weird characters in its name and its decision not to wear a mask, *everything* about 'M is garbage. The graphics that appear in its name will be based on things like your party's stats or your position on the map. 'M is what you get for internal ID 0, so you get garbage even for data that isn't in pokedex order. 'M had some interesting differences from MissingNo. Its cry will randomly change based on what screen you're on, and it could evolve into Kangaskhan.
+
+---
+
+![inline](kangaskhan.png)
+
+^ So you know, I guess this is what a baby kangaskhan looks like
+
+---
+
+![inline](kangaskhan_'m.png)
+
+^ You could also lock up your game by catching it. But if your goal was just to get 128 rare candies, it didn't matter if you saw MissingNo or 'M.
 
 ---
 
@@ -645,7 +680,7 @@ unsafe {
 
 # Not everything you heard was true
 
-^ And those are the only two abnormal effects of the encounter. But there were a lot of things you may have heard that are untrue or only half true.
+^ And those are the only two abnormal effects of the encounter. But remember that the main way this glitch spread was through word of mouth. That means that there were a lot of untrue or half true rumors that spread around
 
 ---
 
@@ -655,7 +690,7 @@ unsafe {
 
 ---
 
-![inline](missingno_fight.png)
+![inline](missingno_fight_masks.png)
 
 ^ There's really no ill effects of catching MissingNo, and there's nothing about it that can't be saved normally. I think the source of this misinformation is a very specific problem that can arise with 'M. In the games you can bring up to 6 pokemon with you, and if you catch one when your party is full, it gets sent to storage. When you open up the storage system, the game has to re-compute the stored pokemon's stats. There's a bug in this calculation that will cause an infinite loop if it tries to compute them for a level 0 pokemon. Since everyone with a custom name could encounter a level 0 'M, and it probably went to storage if you caught it, I believe this is the source of that rumor.
 
@@ -667,7 +702,7 @@ unsafe {
 
 ---
 
-![inline](scrambled_battle.png)
+![inline](scrambled_battle_mask.png)
 
 ^ There's a specific mirroring effect you can cause if you view the stats screen for missingno, but it only affects a specific sprite and it goes away if you view the stats screen for any normal pokemon. There were some bigger glitches if you had MissingNo in the follow up game Pokemon Yellow, but the glitch that let you encounter MissingNo was fixed in that game.
 
@@ -700,6 +735,18 @@ unsafe {
 # I'm really glad we don't hand roll assembly anymore
 
 ^ To me a lot of this glitch just boils down to "because assembly". It's easy for us to take the technologies we have at our disposal today for granted. Today code size is rarely a hard constraint, and only matters because of CPU caches. We run our code on machines powerful enough we can include all sorts of safety checks and never give it another thought. But in 1996 "just use Rust" wasn't an option. Even just using C wasn't an option.
+
+---
+
+# Thanks to the pret team
+
+## github.com/pret/pokered
+
+^ There's a really high quality disassembly of the game available which I used to research this talk. It doesn't have the comments the real source would have, but an invaluable tool in preparing this talk, a huge thanks to the folks who worked on it.
+
+---
+
+# 💛 Tess 💛
 
 ---
 
