@@ -84,7 +84,8 @@
 
 ---
 
-# This glitch is not a single bug
+# This glitch is not
+# a single bug
 
 ^ As with most major glitches, there's no *single* bug that's responsible here. This happens because of a bunch of different bugs, and in most cases you can't even really call them bugs -- just properties of the code being used in unexpected ways.
 
@@ -97,7 +98,7 @@
 
 ---
 
-# Let's break this glitch down
+## Let's break this glitch down
 
 ^ With that out of the way, let's start going through each of the pieces of this glitch. 
 
@@ -432,7 +433,7 @@ if grass_encounter_rate > 0 {
 
 ---
 
-# We can keep the grass encounters from other areas
+## We can keep the grass encounters from other areas
 
 ^ And that's why we specifically do this on Cinnabar Island. Because we can fast travel to any town, it's easy for us to get to this coast in particular without ever passing through an area with grass pokemon
 
@@ -648,7 +649,7 @@ unsafe {
 
 ---
 
-# How you get your rare candies
+## How you get your rare candies
 
 ^ So now let's talk about why the 6th item in your inventory gets duplicated. This has to do with what happens after you encounter a pokemon.
 
@@ -684,7 +685,7 @@ unsafe {
 
 ---
 
-# MissingNo was safe to catch
+## MissingNo was safe to catch
 
 ^ The biggest piece of misinformation you probably heard was "don't catch MissingNo or it'll corrupt your save". This is just straight up false.
 
@@ -732,7 +733,7 @@ unsafe {
 
 ---
 
-# I'm really glad we don't hand roll assembly anymore
+# I'm really glad we don't have to hand roll assembly anymore
 
 ^ To me a lot of this glitch just boils down to "because assembly". It's easy for us to take the technologies we have at our disposal today for granted. Today code size is rarely a hard constraint, and only matters because of CPU caches. We run our code on machines powerful enough we can include all sorts of safety checks and never give it another thought. But in 1996 "just use Rust" wasn't an option. Even just using C wasn't an option.
 
