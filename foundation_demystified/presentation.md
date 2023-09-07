@@ -44,7 +44,7 @@
 
 ---
 
-# Hydration Break
+![inline](ferris-hydrate.svg)
 
 ^ Remember folks, you need to be drinking more water at high altitude. The Rust Foundation cares about rustacean hydration, so let's take a second to drink some water.
 
@@ -97,7 +97,7 @@
 
 ---
 
-# Hydration Break
+![inline](ferris-hydrate.svg)
 
 ^ And now it's time for another hydration break, brought to you by The Rust Foundation. The Foundation cares about Rustacean hydration, so let's all take a moment to drink some water.
 
@@ -162,13 +162,24 @@
 
 # Who Controls the Foundation?
 
+^ Ok, ok, let's get serious. Hey midjourney, who controls the Rust Foundation?
+
+---
+
+![fit](evil-crab.png)
+![hide autoplay](illuminati.mp3)
+
+---
+
+# Who Controls the Foundation?
+
 ^ The actual answer is that our member companies and the project have equal control. And this is really important to understand. The project holds 5 seats on our board, while the number of seats held by member companies changes with our membership. But these groups have equal power.
 
 ^ For a board vote to pass, it requires a super-majority vote of the member directors *and* the project directors. This means if our member directors wanted to use their board votes to somehow undermine the project, they would also need to convince 4 of the 5 project directors to vote with them. But this also never comes up in practice. The board does not vote on nearly as many decisions as people imagine, and when things do go to a vote the vote has virtually always been unanimous. Ultimately our member companies and the Rust Project are very aligned on their priorities, and everyone involved puts in a lot of work to keep it that way. And you don't have to take my word for any of this. Virtually all board votes are recorded in the public meeting minutes.
 
 ---
 
-# Hydration Break
+![inline](ferris-hydrate.svg)
 
 ^ And now it's time for another hydration break, brought to you by The Rust Foundation. The Foundation cares about Rustacean hydration. After the talk, please make sure you stop at a rustacean hydration station, presented by the rust foundation.
 
