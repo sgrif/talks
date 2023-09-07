@@ -1,5 +1,9 @@
 # Rust Foundation: Demystified
 
+![](audio-test.m4a)
+
+^ audio test on advance
+
 ---
 
 # What we do
