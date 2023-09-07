@@ -30,11 +30,9 @@
 - Paying infrastructure costs
 - Providing access to lawyers
 
-^ At its core, the biggest thing the foundation does is raise funds from various companies who are using Rust and funnel it into the ecosystem. This is most directly done through our grants program, where folks inside the project and the community submit proposals for things they'd like to work on, and they receive some amount of funding from the foundation to work on it. But depending on where in the world the grantee lives, this usually isn't enough to cover all their costs. This is why when we're able we also hire full time engineers whose only job is to work on the Rust project. This is something we generally do sparingly, as we don't want to be in a situation where only a handful of people benefit from the foundation. We also need to make sure we're in a situation where we can give our engineers reasonable job security. We never want to be in a position where the foundation is having to do layoffs.
+^ At its core, the biggest thing the foundation does is raise funds from various companies who are using Rust and funnel it into the ecosystem. (next) One way this is done is through our grants program, where folks inside the project and the community submit proposals for things they'd like to work on, and they receive some amount of funding from the foundation to work on it. But depending on where in the world the grantee lives, this usually isn't enough to cover all their costs. (next) This is why when we're able we also hire full time engineers whose only job is to work on the Rust project. This is something we generally do sparingly, as we don't want to be in a situation where only a handful of people benefit from the foundation. We also need to make sure we're in a situation where we can give our engineers reasonable job security. (next)
 
-^ But engineering costs are only one part of what it takes to run the Rust project. Rust has a lot of infrastructure that its built on top of, and this gets *very* expensive. In 2022, our members donated just shy of a million dollars in resources for Rust's CI, file hosting, bandwidth, tools like Crater which tests a change to the compiler by compiling every crate on crates.io, and more.
-
-^ When the project needs something that costs money, the Foundation will either get that donated by one of our members, or pay the cost from our budget otherwise.
+^ But engineering costs are only one part of what it takes to run the Rust project. Rust has a lot of infrastructure that its built on top of, and this gets *very* expensive. In 2022, our members donated just shy of a million dollars in resources for Rust's CI, file hosting, bandwidth, tools like Crater which tests a change to the compiler by compiling every crate on crates.io, and more. (next)
 
 ^ And finally, the project has more legal needs than you might expect. Crates.io has to deal with copyright law (whether that's in the form of DMCA takedown requests or other forms). And the project wants to continue to hold the trademark for Rust. What needs to happen to ensure we keep it? There's also random situations that can come up like: "Rust has a lot of US contribuors. Do we need to care about the US sanctions on Iran when reviewing pull requests?". Also in most countries, people can just sue you for nearly any reason. What if you get sued for work you did on behalf of the project? All of these situations require legal resources, which the Foundation provides.
 
@@ -43,6 +41,12 @@
 # Who is the Rust Project?
 
 ^ So a huge portion of support we provide goes to the Rust project, but who actually is the Rust Project? The answer to this question is surprisingly nebulous, but the short version is it's the group of people who are governed by the Rust Leadership Council. The Project is entirely independent of the Foundation, and is the sole group responsible for the decisions affecting the language. We provide support to them, and sometimes act as stewards on their behalf, but we don't have any direct control over them. We'll talk more about how that relationship is codified in a bit.
+
+---
+
+# Hydration Break
+
+^ Remember folks, you need to be drinking more water at high altitude. The Rust Foundation cares about rustacean hydration, so let's take a second to drink some water.
 
 ---
 
@@ -95,7 +99,7 @@
 
 # Hydration Break
 
-^ Remember folks, you need to be drinking more water at high altitude. The Rust Foundation cares about rustacean hydration, so let's take a second to drink some water.
+^ And now it's time for another hydration break, brought to you by The Rust Foundation. The Foundation cares about Rustacean hydration, so let's all take a moment to drink some water.
 
 ---
 
@@ -134,12 +138,6 @@
 ^ If you want to contribute to open source full time, you shouldn't have to have spent a bunch of nights and weekends doing unpaid labor as a prerequisite. And more often than not the way folks get hired for these jobs is that they are actively looking for someone to pay them to keep doing their open source work. But these companies aren't in a good position to determine whether a team within the project could use more support, and proactively hire someone to increase that team's headcount. By contrast, the foundation is frequently in contact with these teams, meaning that when we have the budget to hire a full time engineer, we're in a great position to see if any teams would be interested in having a new engineer join to support them. This is also a great opportunity for us to give opportunities to someone who might not be able to contribute to open source otherwise.
 
 ^ This is also something we focus on with our community grants program. We work with the Rust teams to find where there is bandwidth to help mentor and onboard new contributors, and ensure that some of our grants go to less experienced people and help them get started with contributing to open source. The hope is that after their grant many of these folks will become team members, or even pursue a career in open source full time.
-
----
-
-# Hydration Break
-
-^ And now it's time for another hydration break, brought to you by The Rust Foundation. The Foundation cares about Rustacean hydration, so let's all take a moment to drink some water.
 
 ---
 
