@@ -1,6 +1,6 @@
 # Rust Foundation: Demystified
 
-![](audio-test.m4a)
+![hide](audio-test.m4a)
 
 ^ audio test on advance
 
@@ -12,9 +12,15 @@
 
 ---
 
-## 501c6 screenshot
+![inline](501c6.png)
 
-^ Although I do want you all to know that the relevant bit of the tax code specifically calls out professional football leagues, which makes me very disappointed that the Rust Foundation isn't formed as the Rust Associated Football Club. At the happy hour everyone please pester our CEO Bec to make this happen.
+^ Although I do want you all to know that the relevant bit of the tax code specifically calls out professional football leagues, which makes me very disappointed that the Rust Foundation isn't formed as the Rust Associated Football Club.
+
+---
+
+![inline](bec.jfif)
+
+^ So I'd like you all to go find Bec, our CEO at the happy hour and tell her that you want to see AFC Rust happen.
 
 ---
 
@@ -22,7 +28,7 @@
 
 - Support the language
 
-^ Fundamentally, we exist to support the Rust language by providing support to the Rust Project and community. This comes in a couple of different forms
+^ Ok, let's get back on topic. What does the Foudnation do? Fundamentally, we exist to support the Rust language by providing support to the Rust Project and community. This comes in a couple of different forms
 
 ---
 [.build-lists: true]
@@ -34,11 +40,11 @@
 - Paying infrastructure costs
 - Providing access to lawyers
 
-^ At its core, the biggest thing the foundation does is raise funds from various companies who are using Rust and funnel it into the ecosystem. (next) One way this is done is through our grants program, where folks inside the project and the community submit proposals for things they'd like to work on, and they receive some amount of funding from the foundation to work on it. But depending on where in the world the grantee lives, this usually isn't enough to cover all their costs. (next) This is why when we're able we also hire full time engineers whose only job is to work on the Rust project. This is something we generally do sparingly, as we don't want to be in a situation where only a handful of people benefit from the foundation. We also need to make sure we're in a situation where we can give our engineers reasonable job security. (next)
+^ At its core, the biggest thing the foundation does is raise funds from various companies who are using Rust and funnel it into the ecosystem. (next) One way this is done is through our grants program, where folks inside the project and the community submit proposals for things they'd like to work on, and they receive funding from the foundation to work on it. But depending on where in the world the grantee lives, this usually isn't enough to cover all their costs. (next) This is why when we're able we also hire full time engineers whose only job is to work on the Rust project. This is something we generally do sparingly, as we don't want to be in a situation where only a handful of people benefit from the foundation. (next)
 
-^ But engineering costs are only one part of what it takes to run the Rust project. Rust has a lot of infrastructure that its built on top of, and this gets *very* expensive. In 2022, our members donated just shy of a million dollars in resources for Rust's CI, file hosting, bandwidth, tools like Crater which tests a change to the compiler by compiling every crate on crates.io, and more. (next)
+^ But it takes more than just software engineers to keep the project running. Rust has a lot of infrastructure that it relies on, and this gets *very* expensive. In 2022, our members donated just shy of a million dollars in resources for Rust's CI, file hosting, bandwidth, tools like Crater which tests a change to the compiler by compiling every crate on crates.io, and more. (next)
 
-^ And finally, the project has more legal needs than you might expect. Crates.io has to deal with copyright law (whether that's in the form of DMCA takedown requests or other forms). And the project wants to continue to hold the trademark for Rust. What needs to happen to ensure we keep it? There's also random situations that can come up like: "Rust has a lot of US contribuors. Do we need to care about the US sanctions on Iran when reviewing pull requests?". Also in most countries, people can just sue you for nearly any reason. What if you get sued for work you did on behalf of the project? All of these situations require legal resources, which the Foundation provides.
+^ And finally, the project has more legal needs than you might expect. Crates.io has to deal with copyright law for the content it hosts. What do they do when they receive a DMCA takedown request? The project wants to continue to hold the trademark for Rust. What needs to happen to ensure that happens? There's also random situations that can come up like: "Rust has a lot of US contribuors. Do we need to care about the US sanctions on Iran when reviewing pull requests?" (That was actually something I had to answer when part of my role within the project was "person with access to the lawyers"). Also in most countries, people can just sue you for nearly any reason. What if you get sued for work you did on behalf of the project? All of these situations require legal resources, which the Foundation provides.
 
 ---
 
@@ -50,7 +56,7 @@
 
 ![inline](ferris-hydrate.svg)
 
-^ Remember folks, you need to be drinking more water at high altitude. The Rust Foundation cares about rustacean hydration, so let's take a second to drink some water.
+^ Remember folks, we're at high altitude, and that means you need to drink more water than you normally would. The Rust Foundation cares about rustacean hydration, so let's take a second to drink some water.
 
 ---
 
@@ -67,19 +73,21 @@
 - Support the language
 - Be a legal entity
 
-^ The next role that the foundation fills is acting as a legal entity for "Rust", when it's needed. When the foundation was originally formed, the MVP was "a legal entity that can hold the trademark that isn't Mozilla". But the need for a legal entity encompasses more than just the trademark, and I'd like to tell you about a case where this happened during my time as the crates.io team lead. This happened years ago, long before the foundation existed. Github token scanning was in an early preview stage. At this point there wasn't easy way for projects to join that system. I had quite a few contacts over there, so I wanted to see if there was some way to get crates.io added in this early stage. Since this was in such an early preview, the first thing that needed to happen was to sign a bunch of legal documents.
+^ Occasionally situations arise where we need a legal entity that can reasionably claim to be "Rust". Being that entity is another role the Foundation plays. When the foundation was originally formed, the MVP was "a legal entity which can hold the trademark that isn't Mozilla (who held the trademark at the time)". But trademarks aren't the only situation where this comes up. I'd like to tell you about a case where this happened during my time as the crates.io team lead. This was years ago, before the foundation existed.
+
+^ GitHub had just released an early preview of a new feature, where it automatically informs you if you pushed an access token for something like AWS to a public repository. Because this was such an early preview, it was focused on major companies like Amazon. There wasn't an easy way for an open source project like crates.io to join. But I had quite a few friends who worked there, so I pulled some strings to get in touch with the team working on the feature. Since this was still an early preview, the first thing that needed to happen was to sign a bunch of legal documents.
 
 ---
 
 # Can Rust sign an NDA?
 
-^ Now just to be clear, this isn't meant to rag on GitHub at all. Given that at the time this feature was focused on companies like AWS, and that this feature was *super* early access, it's completely reasonable for them to have expectations that were meant for companies. But I wasn't a company, I was a single open source contributor.
+^ Now just to be clear, this isn't meant to rag on GitHub at all. At the time, the problem they were trying to solve was people accidentally leaking their keys for S3 and being hit with a huge AWS bill when someone started mining crypto on their account. It's completely reasonable for them to have expectations that were meant for companies, the feature was still being worked on. But I wasn't a company, I was a single open source contributor.
 
 ---
 
-# [anakin meme]
+![inline](anakin.png)
 
-^ So my reaction was like "uh....... Can I sign this contract? I can definitely sign this stuff for myself but I don't think I have the authority to sign this on behalf of everyone else in the Rust project". But that wasn't something that was possible at the time. I spent some time talking to folks within Mozilla legal to see if it was possible to have them act as that authority, but it wasn't something they were willing to do. So this just didn't end up happening. GitHub recommended setting something up in OpenCollective, but I didn't feel like I had the clout to take the lead on that.
+^ So my reaction was like "uh....... Can I sign this contract? I can definitely sign this stuff for myself but I don't think I have the authority to sign this on behalf of everyone else in the Rust project". But that wasn't an option at the time. I spent some time talking to folks within Mozilla legal to see if it was possible to have them act as that authority, but it wasn't something they were willing to do. So this just didn't end up happening. GitHub recommended setting something up in OpenCollective, but I didn't feel like I had the clout to take the lead on that.
 
 ---
 
@@ -129,9 +137,17 @@
 
 # "Macroeconomic Conditions"
 
-^ Yes, we too get macroeconomic conditionsed. Whether that's companies reducing their membership tier, or choosing not to renew other funding they provided in past years. Chances are if you're being told that despite record profits this quarter, you won't be receiving a raise due to macroeconomic conditions, we're also seeing our budget get cut. That said, we do have the benefit of diversity of funding. Nobody's job is tied to the donations of a single company. If funding from one company lapses, we can fill the gaps with funding from other companies rather than laying people off. This can still be visible in shorter term funding though. For example, this year we were only able to issue about half as many grants as last year due to reduced funding.
+^ Yes, we too get macroeconomic conditionsed. Chances are if you're being told that despite record profits this quarter, you won't be receiving a raise due to macroeconomic conditions, we're also seeing our budget reduced. That might happen by companies reducing their membership tier, or by reducing the amount they contribute to initiatives like the community grants program.
 
-^ When this most recent round of grants went out, many pointed out that to keep the budget from last year would have only required a single engineer's salary at one of these large companies. And they're right. Speaking only for myself, and not for anybody else on staff: I shared folks frustration at how small of an impact it would have had on our members for us to be able to maintain our grants budget from last year. But a company being a foundation member doesn't mean we have infinite access to their pocketbooks. We still need these companies to be willing to contribute when we have initiatives to fund. If you work for a member company, you can help by pressuring leadership internally to increase their membership tier, or give additional contributions to things like the community grants program. If you work for a company who isn't yet a member, ask them to sign up as one. Silver memberships in particular are surprisingly affordable, especially for small start-ups.
+^ That said, when our funding does get reduced, the impact is often lessened by the diversity of our sources of funding. Nobody's job is tied to the donations of a single company. If funding from one company lapses, we can fill the gaps with funding from other companies rather than laying people off. However, reductions in our budget still have impact on shorter term investments. For example, this year we were only able to issue about half as many grants as last year due to reduced funding.
+
+^ When this most recent round of grants went out, many pointed out that we could have maintained the previous year's budget for less than a single engineer makes at many of our member companies. And they're right. Speaking only for myself, and not for anybody else on staff: I shared folks frustration at how small of an impact it would have had on our members for us to be able to maintain our grants budget from last year. But a company being a foundation member doesn't mean we have infinite access to their pocketbooks. We still need these companies to be willing to contribute when we have initiatives to fund. If you work for a member company, you can help by pressuring leadership internally to increase their membership tier, or give additional contributions to things like the community grants program.
+
+---
+
+![fit](goose.png)
+
+^ If you work for a company who isn't yet a member, ask them to sign up as one. Silver memberships in particular are surprisingly affordable, especially for small start-ups.
 
 ---
 
@@ -199,6 +215,10 @@
 
 ^ communities advocate. You'll notice that this is "communities" plural, because the Rust community is not a monolith. My job is to make sure that the Foundation is acting in the best interest of th Rust Project and all of Rust's communities. I'm here because after spending more than a decade working in open source full time, I have some *very* strong opinions on how broken open source funding is, and I want to see the Foundation make sure open source contributors today don't have to deal with the bullshit that I did.
 
+^ I also care a lot about the integrity and transparency of both the project and the foundation. Just about anybody who's worked with me within the project can vouch for the fact that if I saw something to be concerned about, I would be very loudly and publicly ringing alarm bells. While we've had no shortage of recent controversies, I'm confident that both organizations are taking the right steps to improve themselves and fix flaws as they're found.
+
+^ And it's important to me that people know that when you see me talk about the internal workings of the foundation, you're not getting a santized view, you're getting my honest opinion on the matter -- even if that view isn't going to be flattering to the foundation. While my coworkers did get a chance to see this talk before I gave it to you, I retained full editorial control over its contents. And that's true any time I speak up on these things.
+
 ---
 
 # Contact me
@@ -208,6 +228,4 @@
 - Bsky: @sgrif.bsky.app
 - Mastodon: @sgrif@hachyderm.io
 
-^ Put shit about integrity here
-
-^ And part of my job is to keep open lines of communication with the project and the community. If you have questions or concerns about the Foundation, or there's something the Foundation could be doing to support you, don't hesitate to reach out through any of these channels. I'll be around for the happy hour after this, so don't hesitate to come find me if you want to chat. Thank you so much for your time, and don't forget to stay hydrated!
+^ Part of my job is to keep open lines of communication with the project and the community. If you have questions or concerns about the Foundation, or there's something the Foundation could be doing to support you, don't hesitate to reach out through any of these channels. I'll be around for the happy hour after this, so don't hesitate to come find me if you want to chat. Thank you so much for your time, and don't forget to stay hydrated!
