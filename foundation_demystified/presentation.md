@@ -121,7 +121,7 @@
 
 ---
 
-## both.gif
+![inline fit](nolosdos.png)
 
 ^ The foundation employeeing engineers isn't mutually exclusive with our members hiring folks to work on Rust full time as well. Many of our member companies have multiple people working on the compiler or other parts of the project full time, and we encourage that. But we would be in a worse situation if that was the only way people got hired to do open source full time.
 
@@ -141,7 +141,7 @@
 
 ^ That said, when our funding does get reduced, the impact is often lessened by the diversity of our sources of funding. Nobody's job is tied to the donations of a single company. If funding from one company lapses, we can fill the gaps with funding from other companies rather than laying people off. However, reductions in our budget still have impact on shorter term investments. For example, this year we were only able to issue about half as many grants as last year due to reduced funding.
 
-^ When this most recent round of grants went out, many pointed out that we could have maintained the previous year's budget for less than a single engineer makes at many of our member companies. And they're right. Speaking only for myself, and not for anybody else on staff: I shared folks frustration at how small of an impact it would have had on our members for us to be able to maintain our grants budget from last year. But a company being a foundation member doesn't mean we have infinite access to their pocketbooks. We still need these companies to be willing to contribute when we have initiatives to fund. If you work for a member company, you can help by pressuring leadership internally to increase their membership tier, or give additional contributions to things like the community grants program.
+^ When this most recent round of grants went out, many pointed out how little it would have cost to maintain our budget from previous years when you look at the scale of our members' pocketbooks. And they're right. Speaking only for myself, and not for anybody else on staff: I shared folks frustration at how small of an impact it would have had on our members for us to be able to maintain our grants budget from last year. But a company being a foundation member doesn't mean we have infinite access to their pocketbooks. We still need these companies to be willing to contribute when we have initiatives to fund. If you work for a member company, you can help by pressuring leadership internally to increase their membership tier, or give additional contributions to things like the community grants program.
 
 ---
 
